@@ -1,0 +1,102 @@
+
+{% extends "base.html" %}
+
+{% block title %}Add Competitor Relationship | StrategySim{% endblock %}
+{% block topbar_context %}Competitor Intelligence{% endblock %}
+{% block page_title %}Add Competitor Relationship{% endblock %}
+{% block page_subtitle %}
+Associate an existing competitor with the selected target company.
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div>
+        <a href="{{ url_for('competitors.company_competitor_relationships', target_company_id=target_company.id) }}"
+           class="text-sm font-medium text-blue-700 hover:text-blue-900">
+            ← Back to Company Relationships
+        </a>
+    </div>
+
+    <section class="content-card">
+
+        <div class="border-b border-gray-100 pb-5">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Target Company
+            </p>
+            <h2 class="mt-1 text-lg font-semibold text-gray-900">
+                {{ target_company.name }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Select an existing competitor from the available companies.
+            </p>
+        </div>
+
+        <form method="POST"
+              action="{{ url_for('competitors.create_relationship', target_company_id=target_company.id) }}"
+              class="mt-6 space-y-5">
+
+            {{ form.hidden_tag() }}
+
+            <div>
+                {{ form.competitor_id.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+
+                {{ form.competitor_id(class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100") }}
+
+                {% for error in form.competitor_id.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Only existing competitor companies from the same industry are eligible.
+                </p>
+            </div>
+
+            <div>
+                {{ form.competitive_strength.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+
+                {{ form.competitive_strength(class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100") }}
+
+                {% for error in form.competitive_strength.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.notes.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+
+                {{ form.notes(rows="5", maxlength="2000", placeholder="Record relevant competitive observations, market overlap, or strategic notes...", class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100") }}
+
+                {% for error in form.notes.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Maximum 2,000 characters. This field is optional.
+                </p>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+                <a href="{{ url_for('competitors.company_competitor_relationships', target_company_id=target_company.id) }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2.5 text-center text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+
+                {{ form.submit(class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800") }}
+            </div>
+
+        </form>
+    </section>
+
+    <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+        <p class="text-sm font-semibold text-blue-900">
+            Important
+        </p>
+        <p class="mt-1 text-sm leading-6 text-blue-800">
+            This operation creates a relationship between two existing company records.
+            It does not create, modify, or delete either company.
+        </p>
+    </div>
+
+</div>
+{% endblock %}

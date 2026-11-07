@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if mode == 'edit' %}Edit SWOT Factor{% else %}Add SWOT Factor{% endif %} | StrategySim
+{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+
+{% block page_title %}
+    {% if mode == 'edit' %}Edit SWOT Factor{% else %}Add SWOT Factor{% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+    Record a strategic factor associated with the selected SWOT assessment.
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="mb-6 border-b border-gray-100 pb-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Assessment
+            </p>
+            <h2 class="mt-1 font-semibold text-gray-900">
+                {{ assessment.assessment_name }}
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                {{ assessment.company_name or 'Company not specified' }}
+            </p>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="space-y-5">
+
+                <div>
+                    {{ form.factor_type.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.factor_type(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none") }}
+
+                    {% for error in form.factor_type.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.factor_name.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.factor_name(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none", placeholder="Enter a clear and specific factor") }}
+
+                    {% for error in form.factor_name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.description.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.description(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none", rows="5", placeholder="Explain the factor and its strategic relevance...") }}
+
+                    {% for error in form.description.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.importance.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.importance(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none") }}
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Optional rating from 1 (low importance) to 5 (high importance).
+                    </p>
+
+                    {% for error in form.importance.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="mt-7 flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
+                <a href="{{ url_for('swot.detail', assessment_id=assessment.id) }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+
+                {{ form.submit(class="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700") }}
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}

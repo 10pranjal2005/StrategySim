@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Component Register | StrategySim{% endblock %}
+{% block topbar_context %}Supplier Network{% endblock %}
+{% block page_title %}Component Register{% endblock %}
+{% block page_subtitle %}Manage components used across the supply chain and monitor their criticality.{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-500">
+                {{ components|length }} component record(s) found
+            </p>
+        </div>
+
+        {% if current_user.role in ['Administrator', 'Analyst'] %}
+        <a href="{{ url_for('supplier_components.create') }}"
+           class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+            + Add Component
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <form method="GET" action="{{ url_for('supplier_components.index') }}"
+              class="grid grid-cols-1 gap-4 md:grid-cols-4">
+
+            <div>
+                <label for="search" class="mb-1 block text-sm font-medium text-gray-700">
+                    Search
+                </label>
+                <input type="text"
+                       id="search"
+                       name="search"
+                       value="{{ search }}"
+                       placeholder="Component name or code"
+                       class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label for="criticality" class="mb-1 block text-sm font-medium text-gray-700">
+                    Criticality
+                </label>
+                <select id="criticality"
+                        name="criticality"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                    <option value="">All levels</option>
+                    {% for level in ['Low', 'Medium', 'High', 'Critical'] %}
+                    <option value="{{ level }}" {% if criticality == level %}selected{% endif %}>
+                        {{ level }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-end">
+                <label class="flex items-center gap-2 text-sm text-gray-700">
+                    <input type="checkbox"
+                           name="active_only"
+                           value="1"
+                           {% if active_only %}checked{% endif %}
+                           class="rounded border-gray-300 text-blue-600">
+                    Active components only
+                </label>
+            </div>
+
+            <div class="flex items-end gap-2">
+                <button type="submit"
+                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">
+                    Apply Filters
+                </button>
+
+                <a href="{{ url_for('supplier_components.index') }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Component Table -->
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Component
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Code
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Category
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Criticality
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Status
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+                    {% for component in components %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-5 py-4">
+                            <a href="{{ url_for('supplier_components.detail', component_id=component.id) }}"
+                               class="font-medium text-blue-700 hover:text-blue-900">
+                                {{ component.name }}
+                            </a>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-600">
+                            {{ component.component_code or '—' }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-600">
+                            {{ component.category or 'Unclassified' }}
+                        </td>
+
+                        <td class="px-5 py-4">
+                            <span class="rounded-full px-2.5 py-1 text-xs font-medium
+                                {% if component.criticality == 'Critical' %}
+                                    bg-red-100 text-red-700
+                                {% elif component.criticality == 'High' %}
+                                    bg-orange-100 text-orange-700
+                                {% elif component.criticality == 'Medium' %}
+                                    bg-yellow-100 text-yellow-700
+                                {% else %}
+                                    bg-green-100 text-green-700
+                                {% endif %}">
+                                {{ component.criticality }}
+                            </span>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm">
+                            {% if component.is_active %}
+                                <span class="font-medium text-green-700">Active</span>
+                            {% else %}
+                                <span class="font-medium text-gray-500">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-5 py-4 text-right">
+                            <a href="{{ url_for('supplier_components.detail', component_id=component.id) }}"
+                               class="text-sm font-medium text-blue-700 hover:underline">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-5 py-12 text-center">
+                            <p class="font-medium text-gray-700">No components found</p>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Register a component to start building your component register.
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

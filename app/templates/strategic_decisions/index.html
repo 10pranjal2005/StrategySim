@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Strategic Decisions | StrategySim{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Strategic Decisions</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                Evaluate strategic alternatives and make evidence-based decisions.
+            </p>
+        </div>
+
+        <a href="{{ url_for('strategic_decisions.new') }}"
+           class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+            + Create Decision
+        </a>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+            <p class="text-sm text-gray-500">Total Decisions</p>
+            <p class="mt-2 text-3xl font-semibold text-gray-900">
+                {{ total_decisions }}
+            </p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+            <p class="text-sm text-gray-500">Strategic Alternatives</p>
+            <p class="mt-2 text-3xl font-semibold text-gray-900">
+                {{ total_alternatives }}
+            </p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+            <p class="text-sm text-gray-500">Evaluation Criteria</p>
+            <p class="mt-2 text-3xl font-semibold text-gray-900">
+                {{ total_criteria }}
+            </p>
+        </div>
+
+    </div>
+
+    <!-- DECISION LIST -->
+    <div class="rounded-xl border border-gray-200 bg-white">
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-200 px-5 py-4">
+            <div>
+                <h2 class="font-semibold text-gray-900">Decision Matrices</h2>
+                <p class="text-xs text-gray-500 mt-1">
+                    Manage and evaluate your strategic decisions.
+                </p>
+            </div>
+
+            <a href="{{ url_for('strategic_decisions.history') }}"
+               class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                View History →
+            </a>
+        </div>
+
+        {% if matrices %}
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Decision
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Company
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
+                            Alternatives
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
+                            Criteria
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Created
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase text-gray-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+
+                    {% for matrix in matrices %}
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-5 py-4">
+                            <p class="font-medium text-gray-900">
+                                {{ matrix.matrix_name }}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ matrix.objective or "No objective specified" }}
+                            </p>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ matrix.company_name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-center text-sm text-gray-700">
+                            {{ matrix.option_count }}
+                        </td>
+
+                        <td class="px-5 py-4 text-center text-sm text-gray-700">
+                            {{ matrix.criterion_count }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-500">
+                            {{ matrix.created_at }}
+                        </td>
+
+                        <td class="px-5 py-4 text-right">
+                            <a href="{{ url_for('strategic_decisions.detail', matrix_id=matrix.id) }}"
+                               class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                Open →
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="px-6 py-14 text-center">
+            <h3 class="font-semibold text-gray-900">
+                No strategic decisions yet
+            </h3>
+            <p class="text-sm text-gray-500 mt-2">
+                Create your first decision matrix to start evaluating alternatives.
+            </p>
+            <a href="{{ url_for('strategic_decisions.new') }}"
+               class="inline-block mt-5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                Create First Decision
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

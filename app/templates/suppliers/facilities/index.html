@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Supplier Facilities | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Supply Chain Intelligence <span class="mx-2">/</span>
+Supplier Network <span class="mx-2">/</span> Facilities
+{% endblock %}
+
+{% block page_title %}Supplier Facilities{% endblock %}
+
+{% block page_subtitle %}
+Register and monitor the operational facilities belonging to suppliers.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <section class="content-card">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900">
+                    Facility Register
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    {{ facilities|length }} facility record(s) found.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ url_for('suppliers.index') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Supplier Network
+                </a>
+
+                {% if current_user.role in ['Administrator', 'Analyst'] %}
+                <a href="{{ url_for('supplier_facilities.create') }}"
+                   class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                    Add Facility
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card">
+        {% if facilities %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Facility
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Supplier
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Type
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Location
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Operational Status
+                        </th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for facility in facilities %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-4">
+                            <div class="text-sm font-semibold text-slate-900">
+                                {{ facility.facility_name }}
+                            </div>
+                            <div class="mt-1 text-xs text-slate-500">
+                                ID: {{ facility.id }}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ facility.supplier_name }}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ facility.facility_type or 'Not specified' }}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ [facility.city, facility.country]|select|join(', ') or 'Not specified' }}
+                        </td>
+
+                        <td class="px-4 py-4">
+                            {% if facility.operational_status == 'Active' %}
+                                <span class="rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800">Active</span>
+                            {% elif facility.operational_status == 'Disrupted' %}
+                                <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800">Disrupted</span>
+                            {% else %}
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-right">
+                            <a href="{{ url_for('supplier_facilities.detail', facility_id=facility.id) }}"
+                               class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="px-6 py-12 text-center">
+            <h3 class="text-base font-semibold text-slate-900">
+                No facilities registered
+            </h3>
+            <p class="mt-2 text-sm text-slate-500">
+                Add a supplier facility to begin monitoring its operational locations.
+            </p>
+
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+            <a href="{{ url_for('supplier_facilities.create') }}"
+               class="mt-4 inline-flex rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                Add First Facility
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if mode == 'edit' %}Edit{% else %}New{% endif %} Value Chain Assessment | StrategySim
+{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+{% block page_title %}
+    {% if mode == 'edit' %}Edit Assessment{% else %}New Value Chain Assessment{% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+Provide the assessment details before documenting Primary and Support Activities.
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            {% if mode == 'create' %}
+            <div class="mb-5">
+                <label for="company_id"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Company <span class="text-red-600">*</span>
+                </label>
+
+                <select id="company_id"
+                        name="company_id"
+                        required
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+
+                    <option value="">Select a company</option>
+
+                    {% for company in companies %}
+                    <option value="{{ company.id }}"
+                        {% if request.form.get('company_id', '')|string == company.id|string %}
+                            selected
+                        {% endif %}>
+                        {{ company.name }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            {% else %}
+            <div class="mb-5">
+                <label class="mb-2 block text-sm font-medium text-gray-700">
+                    Company
+                </label>
+
+                <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700">
+                    {{ assessment.company_name }}
+                </div>
+                <p class="mt-1 text-xs text-gray-500">
+                    The company associated with this assessment cannot be changed.
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="mb-5">
+                <label for="{{ form.assessment_name.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Assessment Name <span class="text-red-600">*</span>
+                </label>
+
+                {{ form.assessment_name(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="e.g. VoltEdge Motors Value Chain Assessment"
+                ) }}
+
+                {% for error in form.assessment_name.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="mb-5">
+                <label for="{{ form.assessment_date.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Assessment Date
+                </label>
+
+                <input type="date"
+                       id="{{ form.assessment_date.id }}"
+                       name="{{ form.assessment_date.name }}"
+                       value="{% if assessment %}{{ assessment.assessment_date or '' }}{% elif form.assessment_date.data %}{{ form.assessment_date.data.isoformat() }}{% endif %}"
+                       class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+
+                {% for error in form.assessment_date.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="mb-6">
+                <label for="{{ form.summary.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Assessment Summary
+                </label>
+
+                {{ form.summary(
+                    rows="5",
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Provide an overview of the company's value chain..."
+                ) }}
+
+                {% for error in form.summary.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5">
+
+                <a href="{% if mode == 'edit' %}{{ url_for('value_chain.detail', assessment_id=assessment.id) }}{% else %}{{ url_for('value_chain.index') }}{% endif %}"
+                   class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+                    {% if mode == 'edit' %}Update Assessment{% else %}Create Assessment{% endif %}
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | StrategySim</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+
+<body class="auth-page">
+
+<div class="auth-shell">
+
+    <!-- LEFT BRAND PANEL -->
+    <section class="auth-brand-panel">
+
+        <div class="auth-brand-content">
+
+            <div class="auth-brand-kicker">
+                <span></span>
+                JOIN THE STRATEGYSIM PLATFORM
+            </div>
+
+            <h1 class="auth-brand-name">
+                Think Ahead<span>.</span>
+            </h1>
+
+            <p class="auth-brand-description">
+                Build a clearer understanding of your business
+                environment. Explore strategic frameworks, assess
+                competitive forces, and make better-informed decisions.
+            </p>
+
+            <div class="auth-feature-list">
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8">
+                            <path d="M12 3 3 8l9 5 9-5-9-5Z"/>
+                            <path d="m3 12 9 5 9-5"/>
+                            <path d="m3 16 9 5 9-5"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3 class="auth-feature-title">
+                            One Strategic Workspace
+                        </h3>
+                        <p class="auth-feature-description">
+                            Access integrated business intelligence tools.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path d="M12 7v5l3 2"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3 class="auth-feature-title">
+                            Structured Analysis
+                        </h3>
+                        <p class="auth-feature-description">
+                            Organise evidence, assessments and insights.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8">
+                            <path d="M4 19V5"/>
+                            <path d="M4 19h16"/>
+                            <path d="m7 15 4-4 3 3 5-7"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3 class="auth-feature-title">
+                            Better Decision Making
+                        </h3>
+                        <p class="auth-feature-description">
+                            Turn analysis into actionable direction.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <!-- RIGHT REGISTRATION PANEL -->
+    <main class="auth-form-panel">
+
+        <div class="auth-form-wrapper">
+
+            <div class="auth-heading">
+                <h1>Create Account</h1>
+                <p>Register to access StrategySim</p>
+            </div>
+
+            <div class="auth-card">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="auth-flash {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST"
+                      action="{{ url_for('auth.register') }}"
+                      novalidate>
+
+                    {{ form.hidden_tag() }}
+
+                    <div class="auth-field">
+                        <label class="auth-label"
+                               for="{{ form.full_name.id }}">
+                            Full Name
+                        </label>
+
+                        {{ form.full_name(
+                            class="auth-input",
+                            placeholder="Enter your full name",
+                            autocomplete="name",
+                            required=true
+                        ) }}
+
+                        {% for error in form.full_name.errors %}
+                            <p class="auth-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="auth-field">
+                        <label class="auth-label"
+                               for="{{ form.email.id }}">
+                            Email Address
+                        </label>
+
+                        {{ form.email(
+                            class="auth-input",
+                            placeholder="Enter your email address",
+                            autocomplete="email",
+                            required=true
+                        ) }}
+
+                        {% for error in form.email.errors %}
+                            <p class="auth-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="auth-field">
+
+                        <label class="auth-label"
+                            for="{{ form.password.id }}">
+                            Create Password
+                        </label>
+
+                        <div class="auth-password-wrapper">
+
+                            {{ form.password(
+                                class="auth-input",
+                                placeholder="Minimum 12 characters",
+                                autocomplete="new-password",
+                                required=true
+                            ) }}
+
+                            <button
+                                type="button"
+                                class="auth-password-toggle"
+                                data-password-toggle
+                                data-target="{{ form.password.id }}"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                                title="Show password"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+
+                        </div>
+
+                        <p class="auth-password-hint">
+                            Use a password between 12 and 128 characters.
+                        </p>
+
+                        {% for error in form.password.errors %}
+                            <p class="auth-field-error">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="auth-field">
+
+                        <label class="auth-label"
+                            for="{{ form.confirm_password.id }}">
+                            Confirm Password
+                        </label>
+
+                        <div class="auth-password-wrapper">
+
+                            {{ form.confirm_password(
+                                class="auth-input",
+                                placeholder="Re-enter your password",
+                                autocomplete="new-password",
+                                required=true
+                            ) }}
+
+                            <button
+                                type="button"
+                                class="auth-password-toggle"
+                                data-password-toggle
+                                data-target="{{ form.confirm_password.id }}"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                                title="Show password"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+
+                        </div>
+
+                        {% for error in form.confirm_password.errors %}
+                            <p class="auth-field-error">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                    <button type="submit" class="auth-submit">
+                        CREATE ACCOUNT <span aria-hidden="true">›</span>
+                    </button>
+
+                </form>
+
+                <p class="auth-switch">
+                    Already have an account?
+                    <a href="{{ url_for('auth.login') }}">
+                        Sign in
+                    </a>
+                </p>
+
+            </div>
+
+            <div class="auth-security-note">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+
+                SECURE ACCOUNT REGISTRATION
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+<script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+</body>
+</html>

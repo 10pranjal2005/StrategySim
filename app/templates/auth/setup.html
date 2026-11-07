@@ -1,0 +1,414 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="Initial administrator setup for StrategySim."
+    >
+
+    <title>Initial Setup | StrategySim</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+
+            min-height: 100vh;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            background: #f3f5f8;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            color: #172033;
+
+            padding: 24px;
+        }
+
+        .setup-container {
+
+            width: 100%;
+
+            max-width: 480px;
+
+            background: #ffffff;
+
+            border: 1px solid #e3e7ee;
+
+            border-radius: 12px;
+
+            padding: 38px;
+
+            box-shadow: 0 8px 30px rgba(20, 35, 60, 0.06);
+        }
+
+        .brand {
+
+            font-size: 25px;
+
+            font-weight: 700;
+
+            letter-spacing: -0.8px;
+
+            color: #173b67;
+
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+
+            font-size: 13px;
+
+            color: #758195;
+
+            margin-bottom: 30px;
+        }
+
+        .heading {
+
+            font-size: 21px;
+
+            font-weight: 700;
+
+            margin-bottom: 10px;
+        }
+
+        .description {
+
+            font-size: 14px;
+
+            line-height: 1.6;
+
+            color: #687386;
+
+            margin-bottom: 25px;
+        }
+
+        .field {
+
+            margin-bottom: 19px;
+        }
+
+        label {
+
+            display: block;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            margin-bottom: 8px;
+        }
+
+        input {
+
+            width: 100%;
+
+            padding: 12px 13px;
+
+            border: 1px solid #d7dce5;
+
+            border-radius: 7px;
+
+            font-size: 14px;
+
+            outline: none;
+
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+
+            border-color: #245b94;
+
+        }
+
+        .help-text {
+
+            font-size: 12px;
+
+            color: #8490a1;
+
+            margin-top: 6px;
+        }
+
+        .error-list {
+
+            list-style: none;
+
+            margin-top: 7px;
+
+            color: #bd3434;
+
+            font-size: 12px;
+        }
+
+        .flash-message {
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            margin-bottom: 18px;
+
+            font-size: 13px;
+        }
+
+        .flash-danger {
+
+            background: #fff0f0;
+
+            color: #a52b2b;
+
+            border: 1px solid #f3caca;
+        }
+
+        .flash-success {
+
+            background: #effaf3;
+
+            color: #247345;
+
+            border: 1px solid #ccebd6;
+        }
+
+        .submit-button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: #173f6d;
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            margin-top: 7px;
+
+            transition: background 0.2s;
+        }
+
+        .submit-button:hover {
+
+            background: #102f53;
+
+        }
+
+        .security-note {
+
+            margin-top: 22px;
+
+            padding-top: 17px;
+
+            border-top: 1px solid #edf0f4;
+
+            font-size: 12px;
+
+            color: #8590a0;
+
+            line-height: 1.6;
+        }
+
+        @media (max-width: 520px) {
+
+            .setup-container {
+
+                padding: 27px 22px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <main class="setup-container">
+
+        <div class="brand">
+            StrategySim
+        </div>
+
+        <div class="subtitle">
+            Strategic Intelligence and Decision Support
+        </div>
+
+
+        <h1 class="heading">
+            Initial Administrator Setup
+        </h1>
+
+        <p class="description">
+
+            Welcome to StrategySim.
+
+            Create the first administrator account to
+            configure and manage your application.
+
+        </p>
+
+
+        <!-- FLASH MESSAGES -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% for category, message in messages %}
+
+                <div class="flash-message flash-{{ category }}">
+
+                    {{ message }}
+
+                </div>
+
+            {% endfor %}
+
+        {% endwith %}
+
+
+        <!-- ADMINISTRATOR SETUP FORM -->
+
+        <form method="POST" action="{{ url_for('auth.initial_setup') }}">
+
+            {{ form.hidden_tag() }}
+
+
+            <div class="field">
+
+                {{ form.full_name.label }}
+
+                {{ form.full_name(
+                    placeholder="Enter your full name",
+                    autocomplete="name"
+                ) }}
+
+                {% for error in form.full_name.errors %}
+
+                    <ul class="error-list">
+                        <li>{{ error }}</li>
+                    </ul>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                {{ form.email.label }}
+
+                {{ form.email(
+                    placeholder="admin@example.com",
+                    autocomplete="email"
+                ) }}
+
+                {% for error in form.email.errors %}
+
+                    <ul class="error-list">
+                        <li>{{ error }}</li>
+                    </ul>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                {{ form.password.label }}
+
+                {{ form.password(
+                    placeholder="Create a strong password",
+                    autocomplete="new-password"
+                ) }}
+
+                <p class="help-text">
+                    Use at least 12 characters.
+                </p>
+
+                {% for error in form.password.errors %}
+
+                    <ul class="error-list">
+                        <li>{{ error }}</li>
+                    </ul>
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="field">
+
+                {{ form.confirm_password.label }}
+
+                {{ form.confirm_password(
+                    placeholder="Re-enter your password",
+                    autocomplete="new-password"
+                ) }}
+
+                {% for error in form.confirm_password.errors %}
+
+                    <ul class="error-list">
+                        <li>{{ error }}</li>
+                    </ul>
+
+                {% endfor %}
+
+            </div>
+
+
+            {{ form.submit(
+                class="submit-button",
+                value="Create Administrator Account"
+            ) }}
+
+
+        </form>
+
+
+        <div class="security-note">
+
+            <strong>Security notice:</strong>
+
+            This initial setup is available only until the
+            first administrator account is created.
+            Passwords are securely hashed before storage.
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>

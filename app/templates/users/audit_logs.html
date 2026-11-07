@@ -1,0 +1,502 @@
+
+{% extends "base.html" %}
+
+{% block title %}Audit Logs | StrategySim{% endblock %}
+
+{% block page_title %}Audit Logs{% endblock %}
+
+{% block page_subtitle %}
+    Monitor administrative activities, account operations and recorded platform events.
+{% endblock %}
+
+{% block page_actions %}
+    <a
+        href="{{ url_for('users.user_directory_page') }}"
+        class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+    >
+        User Directory
+    </a>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Audit Overview -->
+    <section>
+
+        <div class="mb-3">
+            <h2 class="text-sm font-semibold text-slate-800">
+                Audit Overview
+            </h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+                Summary of recorded activities across StrategySim.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+            <!-- Total Audit Records -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm font-medium text-slate-500">
+                        Total Audit Records
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                        </svg>
+
+                    </span>
+
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ total_logs }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Recorded platform activities
+                </p>
+
+            </div>
+
+
+            <!-- Distinct Action Types -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm font-medium text-slate-500">
+                        Action Types
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M4 19V5m0 14h16M8 15l3-4 3 2 5-7"/>
+                        </svg>
+
+                    </span>
+
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ summary.action_counts|length }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Distinct recorded action categories
+                </p>
+
+            </div>
+
+
+            <!-- Records on Current Page -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+
+                    <span class="text-sm font-medium text-slate-500">
+                        Current Page
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h3"/>
+                        </svg>
+
+                    </span>
+
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ logs|length }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Records displayed on this page
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Action Distribution -->
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+        <div class="mb-4">
+            <h2 class="text-sm font-semibold text-slate-800">
+                Activity Distribution
+            </h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+                Recorded activities grouped by action type.
+            </p>
+        </div>
+
+        {% if summary.action_counts %}
+
+            <div class="space-y-4">
+
+                {% for action, count in summary.action_counts.items() %}
+
+                    {% set percentage = (count / total_logs * 100) if total_logs else 0 %}
+
+                    <div>
+
+                        <div class="mb-1.5 flex items-center justify-between gap-4">
+
+                            <span class="break-all text-sm font-medium text-slate-700">
+                                {{ action|replace("_", " ")|title }}
+                            </span>
+
+                            <span class="shrink-0 text-xs font-medium text-slate-500">
+                                {{ count }} ({{ "%.1f"|format(percentage) }}%)
+                            </span>
+
+                        </div>
+
+                        <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+
+                            <div
+                                class="h-full rounded-full bg-brand-600"
+                                style="width: {{ percentage }}%;"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <p class="py-5 text-sm text-slate-500">
+                No activity records are available.
+            </p>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- Audit Records -->
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+
+        <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h2 class="text-sm font-semibold text-slate-800">
+                    Activity Records
+                </h2>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Chronological record of platform activities.
+                </p>
+            </div>
+
+            <div class="text-xs text-slate-500">
+                Page {{ page }} of {{ total_pages }}
+            </div>
+
+        </div>
+
+
+        <!-- Responsive Audit Table -->
+        <div class="overflow-x-auto">
+
+            <table class="min-w-full divide-y divide-slate-200">
+
+                <thead class="bg-slate-50">
+
+                    <tr>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Record
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Performed By
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Action
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Entity
+                        </th>
+
+                        <th scope="col"
+                            class="min-w-64 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Description
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            IP Address
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Timestamp
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+
+                    {% for log in logs %}
+
+                        <tr class="transition hover:bg-slate-50">
+
+                            <!-- Record ID -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                <span class="text-xs font-semibold text-slate-700">
+                                    #{{ log.id }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- User -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                {% if log.performed_by %}
+
+                                    <div class="text-sm font-medium text-slate-800">
+                                        {{ log.performed_by }}
+                                    </div>
+
+                                    <div class="mt-1 text-xs text-slate-500">
+                                        {{ log.performed_by_email or "Email unavailable" }}
+                                    </div>
+
+                                {% else %}
+
+                                    <div class="text-sm font-medium text-slate-700">
+                                        System / Unknown
+                                    </div>
+
+                                    <div class="mt-1 text-xs text-slate-400">
+                                        User ID:
+                                        {{ log.user_id if log.user_id is not none else "Not recorded" }}
+                                    </div>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Action -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                <span class="inline-flex rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                    {{ log.action|replace("_", " ")|title }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- Entity -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                {% if log.entity_type %}
+
+                                    <div class="text-xs font-medium text-slate-700">
+                                        {{ log.entity_type|replace("_", " ")|title }}
+                                    </div>
+
+                                    {% if log.entity_id is not none %}
+
+                                        <div class="mt-1 text-xs text-slate-400">
+                                            ID: {{ log.entity_id }}
+                                        </div>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <span class="text-xs text-slate-400">
+                                        Not specified
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Description -->
+                            <td class="px-5 py-4">
+
+                                <div class="max-w-sm whitespace-normal break-words text-xs leading-5 text-slate-600">
+                                    {{ log.description or "No description provided." }}
+                                </div>
+
+                            </td>
+
+
+                            <!-- IP Address -->
+                            <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-600">
+
+                                {{ log.ip_address or "Not recorded" }}
+
+                            </td>
+
+
+                            <!-- Timestamp -->
+                            <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-600">
+
+                                {{ log.created_at or "Not available" }}
+
+                            </td>
+
+                        </tr>
+
+                    {% else %}
+
+                        <tr>
+
+                            <td colspan="7" class="px-5 py-12 text-center">
+
+                                <div class="text-sm font-medium text-slate-700">
+                                    No audit records found.
+                                </div>
+
+                                <p class="mt-1 text-xs text-slate-500">
+                                    Platform activities will appear here when recorded.
+                                </p>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Pagination -->
+        <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div class="text-xs text-slate-500">
+
+                Showing
+
+                {% if total_logs == 0 %}
+                    0
+                {% else %}
+                    {{ ((page - 1) * limit) + 1 }}
+                {% endif %}
+
+                to
+
+                {{ ((page - 1) * limit) + logs|length }}
+
+                of {{ total_logs }} records
+
+            </div>
+
+
+            <div class="flex items-center gap-2">
+
+                {% if page > 1 %}
+
+                    <a
+                        href="{{ url_for('users.audit_page', page=page - 1) }}"
+                        class="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                    >
+                        Previous
+                    </a>
+
+                {% else %}
+
+                    <span class="inline-flex cursor-not-allowed items-center rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-400">
+                        Previous
+                    </span>
+
+                {% endif %}
+
+
+                <span class="px-2 text-xs font-medium text-slate-600">
+                    {{ page }} / {{ total_pages }}
+                </span>
+
+
+                {% if page < total_pages %}
+
+                    <a
+                        href="{{ url_for('users.audit_page', page=page + 1) }}"
+                        class="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                    >
+                        Next
+                    </a>
+
+                {% else %}
+
+                    <span class="inline-flex cursor-not-allowed items-center rounded-md border border-slate-200 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-400">
+                        Next
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Audit Security Notice -->
+    <section class="rounded-xl border border-slate-200 bg-white p-5">
+
+        <h2 class="text-sm font-semibold text-slate-800">
+            Audit Integrity and Access
+        </h2>
+
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+            Audit records provide an activity history for accountability
+            and administrative monitoring. This interface is read-only.
+            Only Administrators can access the audit log directory.
+            Existing audit records are retained in the database.
+        </p>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,193 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ competitor.name }} | Competitor Intelligence{% endblock %}
+{% block topbar_context %}Competitor Intelligence{% endblock %}
+{% block page_title %}Competitor Profile{% endblock %}
+{% block page_subtitle %}
+Detailed company information and associated competitive relationships.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div>
+        <a href="{{ url_for('competitors.competitor_directory') }}"
+           class="text-sm font-medium text-blue-700 hover:text-blue-900">
+            ← Back to Competitor Directory
+        </a>
+    </div>
+
+    <section class="content-card">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-2xl font-semibold text-gray-900">
+                        {{ competitor.name }}
+                    </h2>
+
+                    {% if competitor.is_demo %}
+                        <span class="rounded bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
+                            Illustrative data
+                        </span>
+                    {% endif %}
+                </div>
+
+                <p class="mt-2 text-sm text-gray-500">
+                    {{ competitor.industry_name }}
+                </p>
+            </div>
+
+            <span class="rounded-lg bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800">
+                Competitor
+            </span>
+        </div>
+
+        <div class="mt-6 border-t border-gray-100 pt-6">
+            <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+                Company Overview
+            </h3>
+
+            <p class="text-sm leading-7 text-gray-700">
+                {{ competitor.description or 'No company description has been provided.' }}
+            </p>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-5 border-t border-gray-100 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+
+            <div>
+                <p class="text-xs font-medium uppercase text-gray-500">
+                    Headquarters
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ competitor.headquarters or 'Not specified' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase text-gray-500">
+                    Website
+                </p>
+                {% if competitor.website %}
+                    <a href="{{ competitor.website }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="mt-1 block break-all text-sm font-medium text-blue-700 hover:underline">
+                        {{ competitor.website }}
+                    </a>
+                {% else %}
+                    <p class="mt-1 text-sm text-gray-900">Not specified</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase text-gray-500">
+                    Founded Year
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ competitor.founded_year or 'Not specified' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase text-gray-500">
+                    Annual Revenue
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ competitor.annual_revenue if competitor.annual_revenue is not none else 'Not available' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase text-gray-500">
+                    Employee Count
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ competitor.employee_count if competitor.employee_count is not none else 'Not available' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase text-gray-500">
+                    Market Share
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {% if competitor.market_share is not none %}
+                        {{ competitor.market_share }}%
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="mb-5 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Associated Target Companies
+                </h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Target companies linked to this competitor.
+                </p>
+            </div>
+
+            <span class="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700">
+                {{ competitor.relationship_count }} relationships
+            </span>
+        </div>
+
+        {% if competitor.relationships %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <th class="px-4 py-3">Target Company</th>
+                            <th class="px-4 py-3">Competitive Strength</th>
+                            <th class="px-4 py-3">Notes</th>
+                            <th class="px-4 py-3">Created</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+                        {% for relationship in competitor.relationships %}
+                            <tr>
+                                <td class="px-4 py-4 text-sm font-medium text-gray-900">
+                                    {{ relationship.target_company_name }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-600">
+                                    {% if relationship.competitive_strength is not none %}
+                                        {{ relationship.competitive_strength }} / 5
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-600">
+                                    {{ relationship.notes or 'No notes available' }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-500">
+                                    {{ relationship.created_at or 'Not available' }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="py-10 text-center">
+                <p class="text-sm font-medium text-gray-800">
+                    No target-company relationships recorded.
+                </p>
+                <p class="mt-1 text-sm text-gray-500">
+                    This competitor has not yet been linked to a target company.
+                </p>
+            </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

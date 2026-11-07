@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+
+{% block title %}{{ supplier.name }} | Supplier Network{% endblock %}
+
+{% block topbar_context %}Supplier Network{% endblock %}
+
+{% block page_title %}Supplier Details{% endblock %}
+
+{% block page_subtitle %}
+View supplier information, risk indicators, and registration details.
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Breadcrumb and Actions -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <a href="{{ url_for('suppliers.index') }}"
+           class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900">
+            <span class="mr-2">&larr;</span>
+            Back to Supplier Network
+        </a>
+
+        <div class="flex flex-wrap gap-2">
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+                <a href="{{ url_for('suppliers.edit', supplier_id=supplier.id) }}"
+                   class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                    Edit Supplier
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Supplier Header -->
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+            <div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-2xl font-semibold text-gray-900">
+                        {{ supplier.name }}
+                    </h2>
+
+                    {% if supplier.is_active %}
+                        <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                            Inactive
+                        </span>
+                    {% endif %}
+                </div>
+
+                <p class="mt-2 text-sm text-gray-500">
+                    Supplier Code:
+                    <span class="font-medium text-gray-700">
+                        {{ supplier.supplier_code or 'Not assigned' }}
+                    </span>
+                </p>
+            </div>
+
+            <div>
+                <span class="rounded-full px-3 py-1 text-sm font-medium
+                    {% if supplier.risk_level == 'Low' %}
+                        bg-green-100 text-green-700
+                    {% elif supplier.risk_level == 'Medium' %}
+                        bg-yellow-100 text-yellow-700
+                    {% elif supplier.risk_level == 'High' %}
+                        bg-orange-100 text-orange-700
+                    {% else %}
+                        bg-red-100 text-red-700
+                    {% endif %}">
+                    {{ supplier.risk_level or 'Not assessed' }} Risk
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Supplier Overview -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+        <!-- General Information -->
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900">
+                General Information
+            </h3>
+
+            <div class="mt-5 divide-y divide-gray-100">
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Supplier Type</span>
+                    <span class="text-right text-sm font-medium text-gray-900">
+                        {{ supplier.supplier_type or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Tier Level</span>
+                    <span class="text-right text-sm font-medium text-gray-900">
+                        Tier {{ supplier.tier_level }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Country</span>
+                    <span class="text-right text-sm font-medium text-gray-900">
+                        {{ supplier.country or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Headquarters</span>
+                    <span class="text-right text-sm font-medium text-gray-900">
+                        {{ supplier.headquarters or 'Not specified' }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Parent Supplier ID</span>
+                    <span class="text-right text-sm font-medium text-gray-900">
+                        {{ supplier.parent_supplier_id or 'None' }}
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Risk and Dependency -->
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900">
+                Risk and Dependency Indicators
+            </h3>
+
+            <div class="mt-5 space-y-5">
+
+                <div>
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-sm text-gray-500">
+                            Financial Dependency Score
+                        </span>
+                        <span class="text-sm font-semibold text-gray-900">
+                            {% if supplier.financial_dependency_score is not none %}
+                                {{ supplier.financial_dependency_score }}/100
+                            {% else %}
+                                Not assessed
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if supplier.financial_dependency_score is not none %}
+                        <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+                            <div class="h-2 rounded-full bg-blue-600"
+                                 style="width: {{ supplier.financial_dependency_score }}%;">
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-sm text-gray-500">
+                            Operational Risk Score
+                        </span>
+                        <span class="text-sm font-semibold text-gray-900">
+                            {% if supplier.operational_risk_score is not none %}
+                                {{ supplier.operational_risk_score }}/100
+                            {% else %}
+                                Not assessed
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    {% if supplier.operational_risk_score is not none %}
+                        <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+                            <div class="h-2 rounded-full bg-orange-500"
+                                 style="width: {{ supplier.operational_risk_score }}%;">
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="border-t border-gray-100 pt-4">
+                    <p class="text-sm text-gray-500">Overall Risk Classification</p>
+                    <p class="mt-1 text-base font-semibold text-gray-900">
+                        {{ supplier.risk_level or 'Not assessed' }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Description -->
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900">
+            Supplier Description
+        </h3>
+
+        <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600">
+            {{ supplier.description or 'No description has been provided for this supplier.' }}
+        </p>
+    </div>
+
+        <!-- Supplied Components -->
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Supplied Components
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Components currently associated with this supplier.
+                </p>
+            </div>
+
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+                <a href="{{ url_for(
+                    'supplier_components.create_mapping',
+                    supplier_id=supplier.id
+                ) }}"
+                   class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                    + Map Component
+                </a>
+            {% endif %}
+
+        </div>
+
+        {% if supplier_components %}
+
+            <div class="mt-5 overflow-x-auto">
+
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Component
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Unit Cost
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Lead Time
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Dependency Share
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Alternative
+                            </th>
+
+                            {% if current_user.role in ['Administrator', 'Analyst'] %}
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                    Actions
+                                </th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100 bg-white">
+
+                        {% for mapping in supplier_components %}
+
+                            <tr>
+
+                                <td class="px-4 py-4">
+                                    <a href="{{ url_for(
+                                        'supplier_components.detail',
+                                        component_id=mapping['component_id']
+                                    ) }}"
+                                       class="font-medium text-blue-600 hover:text-blue-800">
+                                        {{ mapping['component_name'] }}
+                                    </a>
+
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        {{ mapping['component_code'] or 'No component code' }}
+                                    </p>
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {{ mapping['unit_cost'] if mapping['unit_cost'] is not none else 'Not specified' }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {% if mapping['lead_time_days'] is not none %}
+                                        {{ mapping['lead_time_days'] }} days
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {% if mapping['dependency_share_percent'] is not none %}
+                                        {{ mapping['dependency_share_percent'] }}%
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm">
+                                    {% if mapping['is_alternative'] %}
+                                        <span class="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                                            Yes
+                                        </span>
+                                    {% else %}
+                                        <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                                            No
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                {% if current_user.role in ['Administrator', 'Analyst'] %}
+                                    <td class="px-4 py-4 text-right whitespace-nowrap">
+
+                                        <a href="{{ url_for(
+                                            'supplier_components.edit_mapping',
+                                            mapping_id=mapping['id']
+                                        ) }}"
+                                           class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                            Edit
+                                        </a>
+
+                                        <form method="POST"
+                                              action="{{ url_for(
+                                                  'supplier_components.delete_mapping',
+                                                  mapping_id=mapping['id']
+                                              ) }}"
+                                              class="inline ml-3"
+                                              onsubmit="return confirm('Remove this supplier-component mapping?');">
+
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                            <button type="submit"
+                                                    class="text-sm font-medium text-red-600 hover:text-red-800">
+                                                Remove
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+                                {% endif %}
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
+
+                <p class="text-sm font-medium text-gray-700">
+                    No components mapped to this supplier.
+                </p>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Use Map Component to associate a component with this supplier.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    <section class="content-card">
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h3 class="text-base font-semibold text-slate-900">
+                Supplier Facilities
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Operational facilities registered under this supplier.
+            </p>
+        </div>
+
+        <a href="{{ url_for('supplier_facilities.index', supplier_id=supplier.id) }}"
+           class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            View All Facilities
+        </a>
+    </div>
+
+    {% if supplier_facilities %}
+
+    <div class="mt-5 overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                        Facility
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                        Type
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                        Location
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                        Status
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                        Action
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-slate-100 bg-white">
+                {% for facility in supplier_facilities %}
+                <tr class="hover:bg-slate-50">
+
+                    <td class="px-4 py-4 text-sm font-semibold text-slate-900">
+                        {{ facility.facility_name }}
+                    </td>
+
+                    <td class="px-4 py-4 text-sm text-slate-700">
+                        {{ facility.facility_type or 'Not specified' }}
+                    </td>
+
+                    <td class="px-4 py-4 text-sm text-slate-700">
+                        {{ [facility.city, facility.country]|select|join(', ') or 'Not specified' }}
+                    </td>
+
+                    <td class="px-4 py-4 text-sm">
+                        {% if facility.operational_status == 'Active' %}
+                            <span class="font-medium text-green-700">Active</span>
+                        {% elif facility.operational_status == 'Disrupted' %}
+                            <span class="font-medium text-red-700">Disrupted</span>
+                        {% else %}
+                            <span class="font-medium text-slate-500">Inactive</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-4 py-4 text-right">
+                        <a href="{{ url_for('supplier_facilities.detail', facility_id=facility.id) }}"
+                           class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                            View Details
+                        </a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center">
+        <p class="text-sm font-medium text-slate-800">
+            No facilities registered for this supplier.
+        </p>
+        <p class="mt-1 text-sm text-slate-500">
+            You can register facilities through the Supplier Facilities register.
+        </p>
+    </div>
+
+    {% endif %}
+
+</section>
+
+    <!-- Record Information -->
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-gray-900">
+            Record Information
+        </h3>
+
+        <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Supplier ID
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ supplier.id }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Created At
+                </p>
+                <p class="mt-1 text-sm text-gray-900">
+                    {{ supplier.created_at or 'Not available' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Last Updated
+                </p>
+                <p class="mt-1 text-sm text-gray-900">
+                    {{ supplier.updated_at or 'Not available' }}
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Delete Supplier -->
+    {% if current_user.role in ['Administrator', 'Analyst'] %}
+        <div class="rounded-xl border border-red-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-red-700">
+                Delete Supplier
+            </h3>
+
+            <p class="mt-2 text-sm text-gray-600">
+                Deleting this supplier may also affect related supplier relationships,
+                component mappings, and facility records. Procurement records may
+                prevent deletion while they reference this supplier.
+            </p>
+
+            <form method="POST"
+                  action="{{ url_for('suppliers.delete', supplier_id=supplier.id) }}"
+                  class="mt-4"
+                  onsubmit="return confirm('Are you sure you want to delete this supplier? This action cannot be undone.');">
+
+                {{ delete_form.hidden_tag() }}
+
+                <button type="submit"
+                        class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50">
+                    Delete Supplier
+                </button>
+            </form>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

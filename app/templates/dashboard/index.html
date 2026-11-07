@@ -1,0 +1,478 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    Dashboard | StrategySim
+{% endblock %}
+
+{% block topbar_context %}
+    Dashboard
+{% endblock %}
+
+{% block page_title %}
+    Dashboard
+{% endblock %}
+
+{% block page_subtitle %}
+    Your central workspace for strategic intelligence, competitive analysis and business decision support.
+{% endblock %}
+
+
+{% block content %}
+
+<!-- =====================================================
+     WELCOME SECTION
+     ===================================================== -->
+
+<section class="mb-7">
+
+    <div class="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
+
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+
+                <div class="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-600">
+                    StrategySim Workspace
+                </div>
+
+                <h2 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                    Welcome, {{ current_user.full_name }}
+                </h2>
+
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                    Access your strategic analysis workspace and explore
+                    the tools available to your account.
+                </p>
+
+            </div>
+
+
+            <div class="shrink-0">
+
+                <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+
+                    <div class="text-xs font-medium text-slate-500">
+                        Current access level
+                    </div>
+
+                    <div class="mt-1 text-sm font-semibold text-slate-800">
+                        {{ current_user.role }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     WORKSPACE OVERVIEW
+     ===================================================== -->
+
+<section class="mb-8">
+
+    <div class="mb-4">
+
+        <h2 class="text-base font-semibold text-slate-900">
+            Workspace Overview
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+            The major capabilities planned for the StrategySim platform.
+        </p>
+
+    </div>
+
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+
+        <!-- Company Intelligence -->
+
+        <div class="content-card p-5">
+
+            <div class="flex items-start justify-between">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-700">
+                    CI
+                </div>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                    Planned
+                </span>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                Company Intelligence
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Organize company profiles, industry information,
+                competitors and business relationships.
+            </p>
+
+        </div>
+
+
+        <!-- Porter's Five Forces -->
+
+        <div class="content-card p-5">
+
+            <div class="flex items-start justify-between">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-sm font-bold text-indigo-700">
+                    PF
+                </div>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                    Planned
+                </span>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                Porter's Five Forces
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Evaluate industry competition, market forces
+                and the overall competitive environment.
+            </p>
+
+        </div>
+
+
+        <!-- Value Chain -->
+
+        <div class="content-card p-5">
+
+            <div class="flex items-start justify-between">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-sm font-bold text-emerald-700">
+                    VC
+                </div>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                    Planned
+                </span>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                Value Chain Analysis
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Examine primary and support activities,
+                operational costs and sources of business value.
+            </p>
+
+        </div>
+
+
+        <!-- Supplier Intelligence -->
+
+        <div class="content-card p-5">
+
+            <div class="flex items-start justify-between">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-sm font-bold text-amber-700">
+                    SI
+                </div>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                    Planned
+                </span>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                Supplier Intelligence
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Understand supplier dependencies, procurement
+                concentration and supply-chain risks.
+            </p>
+
+        </div>
+
+
+        <!-- Scenario Simulator -->
+
+        <div class="content-card p-5">
+
+            <div class="flex items-start justify-between">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-sm font-bold text-purple-700">
+                    SS
+                </div>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                    Planned
+                </span>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                Scenario Simulator
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Explore hypothetical business situations
+                and evaluate their potential impact.
+            </p>
+
+        </div>
+
+
+        <!-- Decision Support -->
+
+        <div class="content-card p-5">
+
+            <div class="flex items-start justify-between">
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 text-sm font-bold text-rose-700">
+                    DS
+                </div>
+
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+                    Planned
+                </span>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                Decision Support
+            </h3>
+
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+                Compare strategic alternatives using weighted
+                criteria and structured decision matrices.
+            </p>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACCOUNT AND SYSTEM INFORMATION
+     ===================================================== -->
+
+<section class="mb-8">
+
+    <div class="mb-4">
+
+        <h2 class="text-base font-semibold text-slate-900">
+            Account and System Information
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Information associated with your current session.
+        </p>
+
+    </div>
+
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+
+        <!-- Account information -->
+
+        <div class="content-card p-5">
+
+            <h3 class="text-sm font-semibold text-slate-900">
+                Account Information
+            </h3>
+
+            <div class="mt-4 divide-y divide-slate-100">
+
+                <div class="flex items-center justify-between gap-4 py-3">
+
+                    <span class="text-sm text-slate-500">
+                        Full name
+                    </span>
+
+                    <span class="text-sm font-medium text-slate-800">
+                        {{ current_user.full_name }}
+                    </span>
+
+                </div>
+
+
+                <div class="flex items-center justify-between gap-4 py-3">
+
+                    <span class="text-sm text-slate-500">
+                        Account role
+                    </span>
+
+                    <span class="text-sm font-medium text-slate-800">
+                        {{ current_user.role }}
+                    </span>
+
+                </div>
+
+
+                <div class="flex items-center justify-between gap-4 py-3">
+
+                    <span class="text-sm text-slate-500">
+                        Account status
+                    </span>
+
+                    <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                        Active
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Access information -->
+
+        <div class="content-card p-5">
+
+            <h3 class="text-sm font-semibold text-slate-900">
+                Available Access
+            </h3>
+
+            <div class="mt-4 space-y-4">
+
+
+                <div class="flex items-start gap-3">
+
+                    <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-bold text-emerald-700">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <div class="text-sm font-medium text-slate-800">
+                            Dashboard Access
+                        </div>
+
+                        <p class="mt-1 text-xs leading-5 text-slate-500">
+                            View the main StrategySim workspace.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {% if current_user.is_administrator %}
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-bold text-emerald-700">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <div class="text-sm font-medium text-slate-800">
+                                Administrator Access
+                            </div>
+
+                            <p class="mt-1 text-xs leading-5 text-slate-500">
+                                Access administrator-protected system functions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% elif current_user.role == "Analyst" %}
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-xs font-bold text-emerald-700">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <div class="text-sm font-medium text-slate-800">
+                                Analytical Access
+                            </div>
+
+                            <p class="mt-1 text-xs leading-5 text-slate-500">
+                                Access analyst-authorized analytical functions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
+                            ✓
+                        </div>
+
+                        <div>
+
+                            <div class="text-sm font-medium text-slate-800">
+                                Viewer Access
+                            </div>
+
+                            <p class="mt-1 text-xs leading-5 text-slate-500">
+                                Access authorized viewing functions.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     DEVELOPMENT NOTICE
+     ===================================================== -->
+
+<section class="mb-4">
+
+    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+
+        <div class="text-sm font-semibold text-slate-800">
+            Platform Development
+        </div>
+
+        <p class="mt-1 text-sm leading-6 text-slate-500">
+            StrategySim is being developed module by module.
+            Additional analytical capabilities will become available
+            as their respective modules are implemented and integrated.
+        </p>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

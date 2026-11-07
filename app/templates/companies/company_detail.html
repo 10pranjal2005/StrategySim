@@ -1,0 +1,466 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ company.name }} | StrategySim{% endblock %}
+
+{% block topbar_context %}Company Intelligence{% endblock %}
+
+{% block page_title %}Company Profile{% endblock %}
+
+{% block page_subtitle %}
+Detailed intelligence profile and business information.
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Header and Actions -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+        <div>
+            <div class="flex flex-wrap items-center gap-2">
+
+                <h2 class="text-2xl font-semibold text-gray-900">
+                    {{ company.name }}
+                </h2>
+
+                {% if company.company_type == 'Target' %}
+                    <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                        Target
+                    </span>
+                {% elif company.company_type == 'Competitor' %}
+                    <span class="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700">
+                        Competitor
+                    </span>
+                {% else %}
+                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                        Other
+                    </span>
+                {% endif %}
+
+                {% if company.is_demo %}
+                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                        Illustrative Data
+                    </span>
+                {% endif %}
+
+            </div>
+
+            <p class="mt-2 text-sm text-gray-500">
+                Company ID: {{ company.id }}
+                <span class="mx-1">·</span>
+                {{ company.industry_name or 'Industry not specified' }}
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+
+            <a
+                href="{{ url_for('companies.company_directory') }}"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+                Back to Directory
+            </a>
+
+            <a
+                href="{{ url_for('companies.edit_company', company_id=company.id) }}"
+                class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+            >
+                Edit Company
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Company Overview -->
+    <div class="content-card p-5">
+
+        <div class="mb-4 border-b border-gray-100 pb-4">
+            <h3 class="text-base font-semibold text-gray-900">
+                Company Overview
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                General description and identity of the organisation.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Company Name
+                </p>
+                <p class="mt-2 text-sm font-medium text-gray-900">
+                    {{ company.name }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Company Type
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.company_type }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Industry
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.industry_name or 'Not specified' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Headquarters
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.headquarters or 'Not specified' }}
+                </p>
+            </div>
+
+            <div class="md:col-span-2">
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Company Description
+                </p>
+
+                <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
+                    {{ company.description or 'No company description has been provided.' }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Business Information -->
+    <div class="content-card p-5">
+
+        <div class="mb-5 border-b border-gray-100 pb-4">
+            <h3 class="text-base font-semibold text-gray-900">
+                Business Information
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                Public-facing and organisational details.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Website
+                </p>
+
+                <div class="mt-2 text-sm">
+                    {% if company.website %}
+                        <a
+                            href="{{ company.website }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="break-all font-medium text-blue-600 hover:text-blue-800"
+                        >
+                            {{ company.website }}
+                        </a>
+                    {% else %}
+                        <span class="text-gray-500">Not provided</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Founded Year
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.founded_year or 'Not available' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Employee Count
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {% if company.employee_count is not none %}
+                        {{ "{:,}".format(company.employee_count) }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Business Metrics -->
+    <div class="content-card p-5">
+
+        <div class="mb-5 border-b border-gray-100 pb-4">
+            <h3 class="text-base font-semibold text-gray-900">
+                Business Metrics
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                Available financial and market indicators.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-5">
+
+                <p class="text-sm font-medium text-gray-500">
+                    Annual Revenue
+                </p>
+
+                <p class="mt-3 text-xl font-semibold text-gray-900">
+                    {% if company.annual_revenue is not none %}
+                        {{ "{:,.2f}".format(company.annual_revenue) }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Currency and reporting period should be verified before analysis.
+                </p>
+
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-5">
+
+                <p class="text-sm font-medium text-gray-500">
+                    Market Share
+                </p>
+
+                <p class="mt-3 text-xl font-semibold text-gray-900">
+                    {% if company.market_share is not none %}
+                        {{ "%.2f"|format(company.market_share) }}%
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Market share percentage as recorded in the company profile.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Industry Context -->
+    <div class="content-card p-5">
+
+        <div class="mb-5 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="text-base font-semibold text-gray-900">
+                    Industry Context
+                </h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Industry classification associated with this company.
+                </p>
+            </div>
+
+            <a
+                href="{{ url_for('companies.industry_detail', industry_id=company.industry_id) }}"
+                class="text-sm font-medium text-blue-600 hover:text-blue-800"
+            >
+                View Industry
+            </a>
+
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Industry Name
+                </p>
+                <p class="mt-2 text-sm font-medium text-gray-900">
+                    {{ company.industry_name or 'Not specified' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Sector
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.industry_sector or 'Not specified' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Geography
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.industry_geography or 'Not specified' }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Competitor Relationships -->
+    {% if company.company_type == 'Target' %}
+
+        <div class="content-card p-5">
+
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900">
+                        Competitor Relationships
+                    </h3>
+
+                    <p class="mt-1 text-sm leading-6 text-gray-500">
+                        Identify, add and manage competitor companies associated
+                        with this target company. Review competitive strength
+                        and relationship notes.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+
+                    <a
+                        href="{{ url_for('competitors.company_competitor_relationships', target_company_id=company.id) }}"
+                        class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                    >
+                        + Add / Manage Competitors
+                    </a>
+
+                    <a
+                        href="{{ url_for('competitors.competitor_directory') }}"
+                        class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                    >
+                        View Competitor Directory
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="mt-5 rounded-lg border border-blue-100 bg-blue-50 p-4">
+
+                <p class="text-sm leading-6 text-blue-800">
+                    Use the competitor management page to link eligible
+                    competitors from the same industry, assign competitive
+                    strength, update relationship notes and remove relationships.
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+
+    <!-- Record Information -->
+    <div class="content-card p-5">
+
+        <div class="mb-5 border-b border-gray-100 pb-4">
+            <h3 class="text-base font-semibold text-gray-900">
+                Record Information
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                System-level information about this company record.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Company Record ID
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.id }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Created At
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.created_at or 'Not available' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                    Last Updated
+                </p>
+                <p class="mt-2 text-sm text-gray-900">
+                    {{ company.updated_at or 'Not available' }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Data Classification Notice -->
+    {% if company.is_demo %}
+
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+
+            <div class="flex gap-3">
+
+                <div class="mt-0.5 text-amber-700">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M12 9v3.75m0 3h.008M10.29 3.86L1.82 18.5A1.75 1.75 0 003.34 21h17.32a1.75 1.75 0 001.52-2.5L13.71 3.86a1.75 1.75 0 00-3.42 0z"
+                        />
+                    </svg>
+                </div>
+
+                <div>
+                    <h4 class="text-sm font-semibold text-amber-900">
+                        Illustrative Demonstration Record
+                    </h4>
+
+                    <p class="mt-1 text-sm leading-6 text-amber-800">
+                        This company profile is classified as illustrative
+                        demonstration data. Its information is intended for
+                        application testing and demonstration and must not be
+                        treated as verified business or industry intelligence.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

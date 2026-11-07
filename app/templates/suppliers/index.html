@@ -1,0 +1,251 @@
+
+{% extends "base.html" %}
+
+{% block title %}Supplier Network | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Supply Chain Intelligence <span class="mx-2">/</span> Supplier Network
+{% endblock %}
+
+{% block page_title %}Supplier Network{% endblock %}
+
+{% block page_subtitle %}
+Register and monitor suppliers, their risk profiles, and supply-chain relationships.
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <section class="content-card">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900">
+                    Supplier Register
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Central register of suppliers associated with the organisation's supply network.
+                </p>
+            </div>
+
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+            <a href="{{ url_for('suppliers.create') }}"
+            class="inline-flex items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+                <span class="mr-2 text-lg leading-none">+</span>
+                Add Supplier
+            </a>
+            <a href="{{ url_for('supplier_components.index') }}"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Manage Components
+            </a>
+                        <a href="{{ url_for('supplier_components.create_mapping') }}"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Map Supplier to Component
+            </a>
+            {% endif %}
+
+            <a href="{{ url_for('supplier_relationships.index') }}"
+            class="inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-800 hover:bg-blue-100">
+                Manage Supplier Relationships
+            </a>
+
+            <a href="{{ url_for('supplier_facilities.index') }}"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Manage Supplier Facilities
+            </a>
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Suppliers displayed</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">
+                    {{ supplier_records|length }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">High / Critical Risk</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">
+                    {{ supplier_records|selectattr('risk_level', 'in', ['High', 'Critical'])|list|length }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Active Suppliers</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">
+                    {{ supplier_records|selectattr('is_active')|list|length }}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="mb-4">
+            <h3 class="text-base font-semibold text-slate-900">
+                Search and Filters
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Find suppliers by name, code, or risk level.
+            </p>
+        </div>
+
+        <form method="GET"
+              action="{{ url_for('suppliers.index') }}"
+              class="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+            <div class="md:col-span-2">
+                <label for="search"
+                       class="mb-1 block text-sm font-medium text-slate-700">
+                    Search
+                </label>
+                <input type="text"
+                       id="search"
+                       name="search"
+                       value="{{ request.args.get('search', '') }}"
+                       placeholder="Search supplier name or code..."
+                       class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">
+            </div>
+
+            <div>
+                <label for="risk_level"
+                       class="mb-1 block text-sm font-medium text-slate-700">
+                    Risk Level
+                </label>
+                <select id="risk_level"
+                        name="risk_level"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <option value="">All Risk Levels</option>
+                    {% for value, label in filter_form.risk_level.choices %}
+                        {% if value %}
+                        <option value="{{ value }}"
+                            {% if request.args.get('risk_level') == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex flex-wrap gap-2 md:col-span-3">
+                <button type="submit"
+                        class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+                    Apply Filters
+                </button>
+
+                <a href="{{ url_for('suppliers.index') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="content-card">
+        <div class="mb-4">
+            <h3 class="text-base font-semibold text-slate-900">
+                Registered Suppliers
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Select a supplier to view its network information.
+            </p>
+        </div>
+
+        {% if supplier_records %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Supplier
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Type / Tier
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Location
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Risk
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Status
+                        </th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for item in supplier_records %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-4">
+                            <div class="text-sm font-semibold text-slate-900">
+                                {{ item.name }}
+                            </div>
+                            <div class="mt-1 text-xs text-slate-500">
+                                {% if item.supplier_code %}
+                                    {{ item.supplier_code }}
+                                {% else %}
+                                    ID: {{ item.id }}
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            <div>{{ item.supplier_type or 'Not specified' }}</div>
+                            <div class="mt-1 text-xs text-slate-500">
+                                Tier {{ item.tier_level }}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ item.headquarters or item.country or 'Not specified' }}
+                        </td>
+
+                        <td class="px-4 py-4">
+                            {% if item.risk_level == 'Critical' %}
+                                <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800">Critical</span>
+                            {% elif item.risk_level == 'High' %}
+                                <span class="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800">High</span>
+                            {% elif item.risk_level == 'Medium' %}
+                                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Medium</span>
+                            {% else %}
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ item.risk_level }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm">
+                            {% if item.is_active %}
+                                <span class="font-medium text-green-700">Active</span>
+                            {% else %}
+                                <span class="font-medium text-slate-500">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-right">
+                            <a href="{{ url_for('suppliers.detail', supplier_id=item.id) }}"
+                               class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+            <h4 class="text-sm font-semibold text-slate-800">
+                No suppliers found
+            </h4>
+            <p class="mt-2 text-sm text-slate-500">
+                Change your filters or register a supplier to begin building the network.
+            </p>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}

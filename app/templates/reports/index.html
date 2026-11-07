@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | StrategySim{% endblock %}
+
+{% block content %}
+
+<div class="mx-auto max-w-7xl space-y-8">
+
+    <!-- Page Header -->
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                Reports
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Generate and download structured strategic intelligence reports.
+            </p>
+        </div>
+
+        <a href="{{ url_for('reports.history') }}"
+           class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            View Report History
+        </a>
+    </div>
+
+
+    <!-- Report Generation -->
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+        <div class="mb-6">
+            <h2 class="text-lg font-semibold text-slate-900">
+                Generate a Report
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+                Select a report category and target company.
+            </p>
+        </div>
+
+        {% if current_user.role in ["Administrator", "Analyst"] %}
+
+        <form method="POST"
+              action="{{ url_for('reports.generate') }}"
+              class="space-y-5">
+
+            <input type="hidden"
+                   name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                <div>
+                    <label for="report_type"
+                           class="mb-2 block text-sm font-medium text-slate-700">
+                        Report Category
+                    </label>
+
+                    <select id="report_type"
+                            name="report_type"
+                            required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+
+                        <option value="">Select report category</option>
+
+                        {% for key, label in report_types.items() %}
+                            <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+
+                <div>
+                    <label for="company_id"
+                           class="mb-2 block text-sm font-medium text-slate-700">
+                        Target Company
+                    </label>
+
+                    <select id="company_id"
+                            name="company_id"
+                            required
+                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+
+                        <option value="">Select target company</option>
+
+                        {% for company in companies %}
+                            <option value="{{ company.id }}">
+                                {{ company.name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <p class="text-sm font-medium text-blue-900">
+                    Report data policy
+                </p>
+                <p class="mt-1 text-sm text-blue-800">
+                    Reports use saved StrategySim records. Missing information
+                    is identified as unavailable. Illustrative demo records
+                    retain their illustrative classification.
+                </p>
+            </div>
+
+
+            <div class="flex justify-end">
+                <button type="submit"
+                        {% if not companies %}disabled{% endif %}
+                        class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+                    Generate PDF Report
+                </button>
+            </div>
+
+        </form>
+
+        {% else %}
+
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p class="text-sm text-amber-800">
+                You have Viewer access. You can view and download previously
+                generated reports, but cannot generate new reports.
+            </p>
+        </div>
+
+        {% endif %}
+
+        {% if not companies %}
+        <p class="mt-4 text-sm text-amber-700">
+            No target companies are currently available.
+        </p>
+        {% endif %}
+
+    </div>
+
+
+    <!-- Report Categories -->
+    <div>
+        <h2 class="mb-4 text-lg font-semibold text-slate-900">
+            Available Report Categories
+        </h2>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+            {% for key, label in report_types.items() %}
+
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                    {% if key == "company" %}
+                        <span class="text-lg font-bold">C</span>
+                    {% elif key == "strategic" %}
+                        <span class="text-lg font-bold">S</span>
+                    {% elif key == "supply_chain" %}
+                        <span class="text-lg font-bold">N</span>
+                    {% elif key == "scenario" %}
+                        <span class="text-lg font-bold">M</span>
+                    {% else %}
+                        <span class="text-lg font-bold">D</span>
+                    {% endif %}
+                </div>
+
+                <h3 class="font-semibold text-slate-900">
+                    {{ label }}
+                </h3>
+
+                <p class="mt-2 text-sm leading-6 text-slate-500">
+
+                    {% if key == "company" %}
+                        Company profile, industry information and competitor relationships.
+
+                    {% elif key == "strategic" %}
+                        SWOT, Porter's Five Forces and Value Chain assessments.
+
+                    {% elif key == "supply_chain" %}
+                        Supplier mappings, facilities, relationships and procurement records.
+
+                    {% elif key == "scenario" %}
+                        Scenario assumptions, baseline metrics and simulation results.
+
+                    {% else %}
+                        Decision matrices, alternatives, criteria, evaluations and rankings.
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+
+
+    <!-- Recent Reports -->
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+            <div>
+                <h2 class="font-semibold text-slate-900">
+                    Recently Generated Reports
+                </h2>
+                <p class="mt-1 text-xs text-slate-500">
+                    Generated report activity recorded in StrategySim.
+                </p>
+            </div>
+
+            <a href="{{ url_for('reports.history') }}"
+               class="text-sm font-medium text-blue-700 hover:text-blue-800">
+                View All
+            </a>
+        </div>
+
+
+        {% if history %}
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Report
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Generated By
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Date
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+
+                    {% for report in history %}
+
+                    <tr>
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-medium text-slate-900">
+                                {{ report.description }}
+                            </p>
+                            <p class="mt-1 text-xs text-slate-500">
+                                {{ report.filename or "File unavailable" }}
+                            </p>
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-slate-600">
+                            {{ report.generated_by }}
+                        </td>
+
+                        <td class="px-6 py-4 text-sm text-slate-600">
+                            {{ report.generated_at }}
+                        </td>
+
+                        <td class="px-6 py-4 text-right">
+                            {% if report.available %}
+                            <a href="{{ url_for('reports.download', filename=report.filename) }}"
+                               class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                                Download PDF
+                            </a>
+                            {% else %}
+                            <span class="text-xs text-slate-400">
+                                Unavailable
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="px-6 py-12 text-center">
+            <p class="text-sm font-medium text-slate-700">
+                No reports generated yet.
+            </p>
+            <p class="mt-1 text-sm text-slate-500">
+                Generate your first report using the form above.
+            </p>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

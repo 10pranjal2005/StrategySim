@@ -1,0 +1,212 @@
+
+{% extends "base.html" %}
+
+{% block title %}Evidence Register | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Strategic Analysis <span class="mx-2">/</span> Evidence
+{% endblock %}
+
+{% block page_title %}Evidence Register{% endblock %}
+
+{% block page_subtitle %}
+Central repository for research sources, supporting documents, and analytical evidence.
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <section class="content-card">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900">
+                    Evidence Repository
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Browse and manage evidence records used across strategic analyses.
+                </p>
+            </div>
+
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+            <a href="{{ url_for('evidence.create') }}"
+               class="inline-flex items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+                <span class="mr-2 text-lg leading-none">+</span>
+                Add Evidence
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Records displayed</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">
+                    {{ evidence_records|length }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Access level</p>
+                <p class="mt-1 text-lg font-semibold text-slate-900">
+                    {{ current_user.role }}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-card">
+        <div class="mb-4">
+            <h3 class="text-base font-semibold text-slate-900">
+                Search and Filters
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Filter evidence by title, description, or source type.
+            </p>
+        </div>
+
+        <form method="GET"
+              action="{{ url_for('evidence.index') }}"
+              class="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+            <div class="md:col-span-2">
+                <label for="search"
+                       class="mb-1 block text-sm font-medium text-slate-700">
+                    Search
+                </label>
+                <input type="text"
+                       id="search"
+                       name="search"
+                       value="{{ request.args.get('search', '') }}"
+                       placeholder="Search evidence records..."
+                       class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">
+            </div>
+
+            <div>
+                <label for="source_type"
+                       class="mb-1 block text-sm font-medium text-slate-700">
+                    Source Type
+                </label>
+                <select id="source_type"
+                        name="source_type"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                    <option value="">All Source Types</option>
+                    {% for value, label in filter_form.source_type.choices %}
+                        {% if value %}
+                        <option value="{{ value }}"
+                            {% if request.args.get('source_type') == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex flex-wrap gap-2 md:col-span-3">
+                <button type="submit"
+                        class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+                    Apply Filters
+                </button>
+
+                <a href="{{ url_for('evidence.index') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="content-card">
+        <div class="mb-4">
+            <h3 class="text-base font-semibold text-slate-900">
+                Evidence Records
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Select a record to view its full details.
+            </p>
+        </div>
+
+        {% if evidence_records %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Evidence
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Source Type
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Linked Entity
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Reliability
+                        </th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for item in evidence_records %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-4">
+                            <div class="text-sm font-semibold text-slate-900">
+                                {{ item.title }}
+                            </div>
+                            <div class="mt-1 text-xs text-slate-500">
+                                ID: {{ item.id }}
+                                {% if item.source_name %}
+                                    <span class="mx-1">·</span>
+                                    {{ item.source_name }}
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ item.source_type }}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {% if item.entity_type and item.entity_id %}
+                                {{ item.entity_type }} #{{ item.entity_id }}
+                            {% else %}
+                                <span class="text-slate-400">Not linked</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {% if item.reliability_score is not none %}
+                                {{ item.reliability_score }}/5
+                            {% else %}
+                                <span class="text-slate-400">Not assessed</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-right">
+                            <a href="{{ url_for('evidence.detail', evidence_id=item.id) }}"
+                               class="text-sm font-semibold text-blue-700 hover:text-blue-900">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+            <h4 class="text-sm font-semibold text-slate-800">
+                No evidence records found
+            </h4>
+            <p class="mt-2 text-sm text-slate-500">
+                Try changing your search filters or add a new evidence record.
+            </p>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}

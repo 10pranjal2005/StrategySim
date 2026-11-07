@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Report Preview | StrategySim{% endblock %}
+
+{% block content %}
+
+<div class="mx-auto max-w-7xl space-y-6">
+
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">
+                Report Generated
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Your report has been generated and saved successfully.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+
+            <a href="{{ url_for('reports.index') }}"
+               class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                Back to Reports
+            </a>
+
+            <a href="{{ url_for('reports.download', filename=report.filename) }}"
+               class="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">
+                Download PDF
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+        <div class="mb-6 border-b border-slate-200 pb-5">
+
+            <div class="mb-2 inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                PDF Generated
+            </div>
+
+            <h2 class="text-xl font-bold text-slate-900">
+                {{ report.title }}
+            </h2>
+
+            <p class="mt-2 text-sm text-slate-500">
+                Company: {{ report.company_name }}
+            </p>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Generated: {{ report.generated_at }}
+            </p>
+
+        </div>
+
+
+        <div class="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
+            <p class="text-sm font-semibold text-blue-900">
+                Data integrity
+            </p>
+            <p class="mt-1 text-sm text-blue-800">
+                This report uses saved StrategySim records. Missing data is
+                identified as unavailable. No unsupported estimates have
+                been added.
+            </p>
+        </div>
+
+
+        <h3 class="mb-4 text-lg font-semibold text-slate-900">
+            Report Contents
+        </h3>
+
+
+        <div class="space-y-5">
+
+            {% for section in report.sections %}
+
+            <div class="rounded-lg border border-slate-200 p-5">
+
+                <h4 class="font-semibold text-slate-900">
+                    {{ section.title }}
+                </h4>
+
+                <p class="mt-2 text-sm leading-6 text-slate-500">
+                    {{ section.description }}
+                </p>
+
+                {% if section.rows %}
+
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+
+                        {% if section.columns %}
+                        <thead class="bg-slate-50">
+                            <tr>
+                                {% for column in section.columns %}
+                                <th class="px-3 py-2 text-left text-xs font-semibold text-slate-600">
+                                    {{ column }}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        {% endif %}
+
+                        <tbody class="divide-y divide-slate-100">
+
+                            {% for row in section.rows %}
+
+                            <tr>
+                                {% for cell in row %}
+                                <td class="px-3 py-2 text-sm text-slate-700">
+                                    {{ cell if cell is not none else "Unavailable" }}
+                                </td>
+                                {% endfor %}
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+                {% else %}
+
+                <p class="mt-4 text-sm text-slate-400">
+                    No saved records available for this section.
+                </p>
+
+                {% endif %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

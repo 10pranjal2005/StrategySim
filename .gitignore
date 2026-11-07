@@ -1,0 +1,63 @@
+# =========================================================
+# StrategySim - Git Ignore Configuration
+# =========================================================
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local application data
+/instance/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Database backups and project backups
+/backups/
+*.bak
+*.backup
+
+# Generated reports and documents
+*.log
+*.tmp
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+
+# Node-related generated files, if any
+node_modules/
+# Local development reference files
+/inspect_competitor_table.py
+/scenario_simulator_source.txt
+/strategic_decisions_schema.txt

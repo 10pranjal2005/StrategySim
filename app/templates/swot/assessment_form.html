@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if mode == 'edit' %}Edit SWOT Assessment{% else %}New SWOT Assessment{% endif %} | StrategySim
+{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+
+{% block page_title %}
+    {% if mode == 'edit' %}Edit SWOT Assessment{% else %}Create SWOT Assessment{% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+    Define the company and assessment details before adding SWOT factors.
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="space-y-5">
+
+                <div>
+                    {{ form.company_id.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+
+                    {% if mode == 'edit' %}
+                        <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                            {{ assessment.company_name or 'Company not specified' }}
+                        </div>
+                        <input type="hidden"
+                               name="company_id"
+                               value="{{ assessment.company_id }}">
+                        <p class="mt-1 text-xs text-gray-500">
+                            The company associated with an existing assessment cannot be changed.
+                        </p>
+                    {% else %}
+                        {{ form.company_id(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none") }}
+                    {% endif %}
+
+                    {% for error in form.company_id.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.assessment_name.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.assessment_name(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none", placeholder="e.g. FY 2026 Strategic SWOT Assessment") }}
+
+                    {% for error in form.assessment_name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.assessment_date.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.assessment_date(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none") }}
+
+                    {% for error in form.assessment_date.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.summary.label(class="mb-1 block text-sm font-medium text-gray-700") }}
+                    {{ form.summary(class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none", rows="5", placeholder="Enter a concise overview of this strategic assessment...") }}
+
+                    {% for error in form.summary.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="mt-7 flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
+
+                {% if mode == 'edit' and assessment %}
+                <a href="{{ url_for('swot.detail', assessment_id=assessment.id) }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+                {% else %}
+                <a href="{{ url_for('swot.index') }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+                {% endif %}
+
+                {{ form.submit(class="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700") }}
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}

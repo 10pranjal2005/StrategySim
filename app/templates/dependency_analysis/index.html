@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Dependency Analysis | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Supply Chain Intelligence <span class="mx-2">/</span> Dependency Analysis
+{% endblock %}
+
+{% block page_title %}Dependency Analysis{% endblock %}
+
+{% block page_subtitle %}
+Evaluate supplier concentration, component dependency, alternative sourcing,
+procurement exposure, and supplier facility risks.
+{% endblock %}
+
+{% block content %}
+
+{% set summary = dashboard.summary %}
+
+<div class="space-y-6">
+
+    <!-- Overview -->
+    <section class="content-card">
+        <div class="mb-5">
+            <h2 class="text-lg font-semibold text-slate-900">
+                Dependency Overview
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+                Current supply-chain dependency indicators based on registered data.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Total Components</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ summary.get('total_components', 0) }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Mapped Components</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ summary.get('mapped_components', 0) }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Single-Source Components</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ summary.get('single_source_components', 0) }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">High-Criticality Components</p>
+                <p class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ summary.get('high_criticality_components', 0) }}
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Component Dependency Register -->
+    <section class="content-card">
+
+        <div class="mb-5">
+            <h2 class="text-base font-semibold text-slate-900">
+                Component Dependency Register
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+                Review supplier availability, alternative sourcing, concentration,
+                and lead-time exposure for each component.
+            </p>
+        </div>
+
+        {% if dashboard.components %}
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Component
+                        </th>
+
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Criticality
+                        </th>
+
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Supplier Mappings
+                        </th>
+
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Dependency Status
+                        </th>
+
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Recorded Share
+                        </th>
+
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Lead Time
+                        </th>
+
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+
+                    {% for item in dashboard.components %}
+
+                    <tr class="hover:bg-slate-50">
+
+                        <td class="px-4 py-4">
+                            <div class="text-sm font-semibold text-slate-900">
+                                {{ item.component_name }}
+                            </div>
+                            <div class="mt-1 text-xs text-slate-500">
+                                {{ item.component_code or 'No component code' }}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ item.criticality }}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {{ item.supplier_count }}
+                            <span class="text-xs text-slate-500">
+                                ({{ item.alternative_supplier_count }} alternatives)
+                            </span>
+                        </td>
+
+                        <td class="px-4 py-4">
+                            {% if item.dependency_status == 'Single Source' %}
+                                <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-800">
+                                    Single Source
+                                </span>
+                            {% elif item.dependency_status == 'Single Primary Supplier' %}
+                                <span class="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                                    Single Primary
+                                </span>
+                            {% elif item.dependency_status == 'No Supplier Mapping' %}
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                    Unmapped
+                                </span>
+                            {% else %}
+                                <span class="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
+                                    {{ item.dependency_status }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {% if item.recorded_dependency_share_percent is not none %}
+                                {{ "%.2f"|format(item.recorded_dependency_share_percent) }}%
+                            {% else %}
+                                <span class="text-slate-400">Not recorded</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-sm text-slate-700">
+                            {% if item.average_lead_time_days is not none %}
+                                {{ item.average_lead_time_days }} days
+                            {% else %}
+                                Not recorded
+                            {% endif %}
+                        </td>
+
+                        <td class="px-4 py-4 text-right">
+                            <a
+                                href="{{ url_for('dependency_analysis.component_detail', component_id=item.component_id) }}"
+                                class="text-sm font-semibold text-blue-700 hover:text-blue-900"
+                            >
+                                View Analysis
+                            </a>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center">
+            <h3 class="text-sm font-semibold text-slate-800">
+                No components available
+            </h3>
+            <p class="mt-2 text-sm text-slate-500">
+                Register components and map them to suppliers through Supplier Network.
+            </p>
+            <a
+                href="{{ url_for('supplier_components.index') }}"
+                class="mt-4 inline-flex text-sm font-semibold text-blue-700 hover:text-blue-900"
+            >
+                Open Component Register
+            </a>
+        </div>
+
+        {% endif %}
+
+    </section>
+
+    <!-- Procurement and Facility Exposure -->
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+        <section class="content-card">
+            <h2 class="text-base font-semibold text-slate-900">
+                Procurement Exposure
+            </h2>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Recorded procurement expenditure across suppliers.
+            </p>
+
+            <div class="mt-5">
+                <p class="text-sm text-slate-500">Total Annual Spend</p>
+
+                <p class="mt-1 text-2xl font-semibold text-slate-900">
+                    {% if summary.get('procurement_available') %}
+                        ₹{{ "{:,.2f}".format(summary.get('total_annual_spend') or 0) }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+
+                <p class="mt-2 text-xs text-slate-500">
+                    {{ summary.get('total_procurement_records', 0) }}
+                    procurement records registered.
+                </p>
+            </div>
+
+            {% if not summary.get('procurement_available') %}
+            <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                Procurement data has not been recorded yet. Spend-based
+                dependency analysis will become available when procurement
+                records are added.
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="content-card">
+            <h2 class="text-base font-semibold text-slate-900">
+                Supplier Facility Exposure
+            </h2>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Operational status of registered supplier facilities.
+            </p>
+
+            <div class="mt-5 grid grid-cols-2 gap-4">
+
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <p class="text-sm text-slate-500">Total Facilities</p>
+                    <p class="mt-2 text-2xl font-semibold text-slate-900">
+                        {{ summary.get('total_facilities', 0) }}
+                    </p>
+                </div>
+
+                <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <p class="text-sm text-slate-500">Active Facilities</p>
+                    <p class="mt-2 text-2xl font-semibold text-slate-900">
+                        {{ summary.get('active_facilities', 0) }}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="mt-4 rounded-lg border border-slate-200 p-3">
+                <p class="text-sm text-slate-600">
+                    Disrupted Facilities:
+                    <strong>{{ summary.get('disrupted_facilities', 0) }}</strong>
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Supplier Spend Concentration -->
+    <section class="content-card">
+
+        <h2 class="text-base font-semibold text-slate-900">
+            Supplier Spend Concentration
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Supplier-wise share of recorded annual procurement expenditure.
+        </p>
+
+        {% if dashboard.supplier_spend %}
+
+        <div class="mt-5 overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                            Supplier
+                        </th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                            Annual Spend
+                        </th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                            Spend Share
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for item in dashboard.supplier_spend %}
+
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-medium text-slate-800">
+                            {{ item.supplier_name }}
+                        </td>
+
+                        <td class="px-4 py-3 text-right text-sm text-slate-700">
+                            ₹{{ "{:,.2f}".format(item.annual_spend) }}
+                        </td>
+
+                        <td class="px-4 py-3 text-right text-sm text-slate-700">
+                            {% if item.spend_share_percent is not none %}
+                                {{ item.spend_share_percent }}%
+                            {% else %}
+                                Not available
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <p class="mt-4 rounded-lg bg-slate-50 p-4 text-sm text-slate-500">
+            Supplier spend concentration cannot be calculated until procurement
+            records are registered.
+        </p>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

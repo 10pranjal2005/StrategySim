@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Value Chain Analysis | StrategySim{% endblock %}
+{% block topbar_context %}Strategic Analysis{% endblock %}
+{% block page_title %}Value Chain Analysis{% endblock %}
+{% block page_subtitle %}
+Analyse the activities through which the company creates value and develops competitive advantage.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900">Value Chain Assessments</h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Review and manage Primary and Support Activity assessments.
+            </p>
+        </div>
+
+        {% if current_user.has_role('Administrator', 'Analyst') %}
+        <a href="{{ url_for('value_chain.create') }}"
+           class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+            + New Assessment
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Primary Activities
+            </p>
+            <p class="mt-2 text-sm font-medium text-gray-900">
+                Activities directly involved in creating, delivering and supporting the product.
+            </p>
+        </div>
+
+        <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Support Activities
+            </p>
+            <p class="mt-2 text-sm font-medium text-gray-900">
+                Activities that enable and strengthen the company's primary operations.
+            </p>
+        </div>
+    </div>
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <form method="GET"
+              action="{{ url_for('value_chain.index') }}"
+              class="flex flex-col gap-3 sm:flex-row sm:items-end">
+
+            <div class="flex-1">
+                <label for="search"
+                       class="mb-1 block text-sm font-medium text-gray-700">
+                    Search Assessments
+                </label>
+
+                <input type="text"
+                       id="search"
+                       name="search"
+                       value="{{ request.args.get('search', '') }}"
+                       placeholder="Search by assessment name..."
+                       class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                    Search
+                </button>
+
+                <a href="{{ url_for('value_chain.index') }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="content-card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div class="border-b border-gray-200 px-5 py-4">
+            <h3 class="font-semibold text-gray-900">Assessment Register</h3>
+        </div>
+
+        {% if assessments %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Assessment
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Company
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Assessment Date
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Activities
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Created By
+                        </th>
+
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+                    {% for item in assessments %}
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-5 py-4">
+                            <div class="font-medium text-gray-900">
+                                {{ item.assessment_name }}
+                            </div>
+                            <div class="mt-1 text-xs text-gray-500">
+                                ID: {{ item.id }}
+                            </div>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ item.company_name or '—' }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ item.assessment_date or '—' }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ item.activity_count or 0 }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ item.created_by_name or '—' }}
+                        </td>
+
+                        <td class="px-5 py-4 text-right">
+                            <a href="{{ url_for('value_chain.detail', assessment_id=item.id) }}"
+                               class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                View Assessment
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="px-5 py-12 text-center">
+            <h3 class="text-base font-semibold text-gray-900">
+                No Value Chain assessments found
+            </h3>
+
+            <p class="mt-2 text-sm text-gray-500">
+                Create an assessment to begin analysing the company's value-generating activities.
+            </p>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <a href="{{ url_for('value_chain.create') }}"
+               class="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                Create First Assessment
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

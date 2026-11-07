@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">
+                Supplier Relationships
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">
+                View and manage relationships between suppliers.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <a
+                href="{{ url_for('suppliers.index') }}"
+                class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+                Supplier Network
+            </a>
+
+            {% if current_user.role in ["Administrator", "Analyst"] %}
+            <a
+                href="{{ url_for('supplier_relationships.create') }}"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+            >
+                Add Relationship
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if supplier_id %}
+    <div class="mb-4 flex items-center gap-2">
+        <p class="text-sm text-gray-600">
+            Showing relationships involving supplier ID {{ supplier_id }}.
+        </p>
+
+        <a
+            href="{{ url_for('supplier_relationships.index') }}"
+            class="text-sm text-blue-600 hover:underline"
+        >
+            Clear filter
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+
+        <div class="px-5 py-4 border-b border-gray-200">
+            <h2 class="text-base font-semibold text-gray-900">
+                Relationship Records
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+                {{ relationships|length }} relationship(s) found
+            </p>
+        </div>
+
+        {% if relationships %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Source Supplier
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Target Supplier
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Relationship Type
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Dependency Strength
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
+                            Description
+                        </th>
+
+                        {% if current_user.role in ["Administrator", "Analyst"] %}
+                        <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">
+                            Actions
+                        </th>
+                        {% endif %}
+                    </tr>
+                </thead>
+
+                <tbody class="bg-white divide-y divide-gray-200">
+
+                    {% for relationship in relationships %}
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-5 py-4 text-sm font-medium text-gray-900">
+                            {{ relationship.source_supplier_name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ relationship.target_supplier_name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ relationship.relationship_type }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {% if relationship.dependency_strength is not none %}
+                                {{ "%.1f"|format(relationship.dependency_strength) }}%
+                            {% else %}
+                                <span class="text-gray-400">Not specified</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-600 max-w-xs">
+                            {{ relationship.description or "—" }}
+                        </td>
+
+                        {% if current_user.role in ["Administrator", "Analyst"] %}
+                        <td class="px-5 py-4 text-right">
+                            <form
+                                method="POST"
+                                action="{{ url_for('supplier_relationships.delete', relationship_id=relationship.id) }}"
+                                onsubmit="return confirm('Are you sure you want to delete this supplier relationship?');"
+                            >
+                                {{ delete_form.hidden_tag() }}
+
+                                <button
+                                    type="submit"
+                                    class="text-sm text-red-600 hover:text-red-800 font-medium"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                        {% endif %}
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="px-6 py-12 text-center">
+            <h3 class="text-base font-medium text-gray-900">
+                No supplier relationships found
+            </h3>
+
+            <p class="text-sm text-gray-500 mt-2">
+                Create a relationship to begin mapping connections between suppliers.
+            </p>
+
+            {% if current_user.role in ["Administrator", "Analyst"] %}
+            <a
+                href="{{ url_for('supplier_relationships.create') }}"
+                class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+            >
+                Create First Relationship
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

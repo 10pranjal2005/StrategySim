@@ -1,0 +1,370 @@
+
+{% extends "base.html" %}
+
+{% block title %}Edit Company | StrategySim{% endblock %}
+
+{% block topbar_context %}Company Intelligence{% endblock %}
+
+{% block page_title %}Edit Company{% endblock %}
+
+{% block page_subtitle %}
+Update the organisation's profile and business information.
+{% endblock %}
+
+{% block content %}
+
+<div class="mx-auto max-w-5xl space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900">
+                Update Company Information
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-500">
+                Editing: {{ company.name }}
+                <span class="mx-1">·</span>
+                Company ID: {{ company.id }}
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('companies.company_detail', company_id=company.id) }}"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+        >
+            Back to Profile
+        </a>
+
+    </div>
+
+
+    <!-- Edit Form -->
+    <div class="content-card p-5 sm:p-7">
+
+        <form method="POST" action="{{ url_for('companies.edit_company', company_id=company.id) }}" class="space-y-8">
+
+            {{ form.hidden_tag() }}
+
+            <!-- Basic Information -->
+            <section>
+
+                <div class="mb-5 border-b border-gray-100 pb-4">
+                    <h3 class="text-base font-semibold text-gray-900">
+                        Basic Information
+                    </h3>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Core identity and industry classification.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                    <!-- Company Name -->
+                    <div class="md:col-span-2">
+
+                        {{ form.name.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.name(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="Enter company name"
+                        ) }}
+
+                        {% for error in form.name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Industry -->
+                    <div>
+
+                        {{ form.industry_id.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.industry_id(
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        ) }}
+
+                        {% for error in form.industry_id.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Company Type -->
+                    <div>
+
+                        {{ form.company_type.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.company_type(
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        ) }}
+
+                        {% for error in form.company_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Description -->
+                    <div class="md:col-span-2">
+
+                        {{ form.description.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.description(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            rows="4",
+                            placeholder="Describe the company's business, products and operations..."
+                        ) }}
+
+                        {% for error in form.description.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Company Details -->
+            <section>
+
+                <div class="mb-5 border-b border-gray-100 pb-4">
+                    <h3 class="text-base font-semibold text-gray-900">
+                        Company Details
+                    </h3>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Location and organisational information.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                    <!-- Headquarters -->
+                    <div>
+
+                        {{ form.headquarters.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.headquarters(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="e.g. Bengaluru, India"
+                        ) }}
+
+                        {% for error in form.headquarters.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Website -->
+                    <div>
+
+                        {{ form.website.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.website(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="https://example.com"
+                        ) }}
+
+                        {% for error in form.website.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Founded Year -->
+                    <div>
+
+                        {{ form.founded_year.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.founded_year(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="e.g. 2020"
+                        ) }}
+
+                        {% for error in form.founded_year.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Employee Count -->
+                    <div>
+
+                        {{ form.employee_count.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.employee_count(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="Enter employee count"
+                        ) }}
+
+                        {% for error in form.employee_count.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Business Metrics -->
+            <section>
+
+                <div class="mb-5 border-b border-gray-100 pb-4">
+                    <h3 class="text-base font-semibold text-gray-900">
+                        Business Metrics
+                    </h3>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Optional financial and market indicators.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                    <!-- Annual Revenue -->
+                    <div>
+
+                        {{ form.annual_revenue.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.annual_revenue(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="Enter annual revenue"
+                        ) }}
+
+                        {% for error in form.annual_revenue.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                        <p class="mt-1 text-xs text-gray-500">
+                            Enter a value only when supported by a reliable source.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Market Share -->
+                    <div>
+
+                        {{ form.market_share.label(class="mb-1.5 block text-sm font-medium text-gray-700") }}
+
+                        {{ form.market_share(
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100",
+                            placeholder="Enter percentage"
+                        ) }}
+
+                        {% for error in form.market_share.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+
+                        <p class="mt-1 text-xs text-gray-500">
+                            Enter a percentage between 0 and 100.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Data Classification -->
+            <section>
+
+                <div class="mb-5 border-b border-gray-100 pb-4">
+                    <h3 class="text-base font-semibold text-gray-900">
+                        Data Classification
+                    </h3>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Identify whether this record contains illustrative information.
+                    </p>
+                </div>
+
+                <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+
+                    <div class="flex items-start gap-3">
+
+                        <div class="pt-0.5">
+                            {{ form.is_demo(
+                                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            ) }}
+                        </div>
+
+                        <div class="min-w-0">
+
+                            {{ form.is_demo.label(class="text-sm font-medium text-amber-900") }}
+
+                            <p class="mt-1 text-sm leading-5 text-amber-800">
+                                Enable this option if the company record contains
+                                sample, hypothetical or demonstration information.
+                                Such records must not be presented as verified
+                                industry facts.
+                            </p>
+
+                            {% for error in form.is_demo.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Form Actions -->
+            <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:justify-end">
+
+                <a
+                    href="{{ url_for('companies.company_detail', company_id=company.id) }}"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                    Cancel
+                </a>
+
+                {{ form.submit(
+                    value="Save Changes",
+                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                ) }}
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- Information Notice -->
+    <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+
+        <h4 class="text-sm font-semibold text-blue-900">
+            Data Accuracy Reminder
+        </h4>
+
+        <p class="mt-1 text-sm leading-6 text-blue-800">
+            Update company information only when the details are supported
+            by appropriate evidence. Leave unavailable financial or market
+            metrics blank rather than entering estimated values as verified facts.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

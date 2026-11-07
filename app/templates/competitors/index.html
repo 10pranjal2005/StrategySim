@@ -1,0 +1,196 @@
+
+{% extends "base.html" %}
+
+{% block title %}Competitor Intelligence | StrategySim{% endblock %}
+{% block topbar_context %}Competitor Intelligence{% endblock %}
+{% block page_title %}Competitor Intelligence{% endblock %}
+{% block page_subtitle %}
+Explore competitor companies, review their industry presence, and examine their relationships with target companies.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-500">
+                Competitor directory
+            </p>
+            <h2 class="text-xl font-semibold text-gray-900">
+                Competitor Companies
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                {{ total }} competitor{{ '' if total == 1 else 's' }} found.
+            </p>
+        </div>
+    </div>
+
+    <section class="content-card">
+        <form method="GET"
+              action="{{ url_for('competitors.competitor_directory') }}"
+              class="grid grid-cols-1 gap-4 md:grid-cols-12">
+
+            <div class="md:col-span-6">
+                <label for="search"
+                       class="mb-1 block text-sm font-medium text-gray-700">
+                    Search competitor
+                </label>
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    value="{{ search or '' }}"
+                    placeholder="Enter competitor name"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                >
+            </div>
+
+            <div class="md:col-span-4">
+                <label for="industry_id"
+                       class="mb-1 block text-sm font-medium text-gray-700">
+                    Industry
+                </label>
+                <select
+                    id="industry_id"
+                    name="industry_id"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                >
+                    <option value="">All industries</option>
+                    {% for industry in industries %}
+                        <option value="{{ industry.id }}"
+                            {% if selected_industry_id == industry.id|string %}
+                                selected
+                            {% endif %}>
+                            {{ industry.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-end gap-2 md:col-span-2">
+                <button type="submit"
+                        class="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800">
+                    Apply
+                </button>
+                <a href="{{ url_for('competitors.competitor_directory') }}"
+                   class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="content-card">
+        <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-base font-semibold text-gray-900">
+                Competitor Directory
+            </h3>
+            <span class="text-xs text-gray-500">
+                Page {{ page }} of {{ total_pages if total_pages > 0 else 1 }}
+            </span>
+        </div>
+
+        {% if competitors %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <th class="px-4 py-3">Company</th>
+                            <th class="px-4 py-3">Industry</th>
+                            <th class="px-4 py-3">Headquarters</th>
+                            <th class="px-4 py-3">Market Share</th>
+                            <th class="px-4 py-3">Relationships</th>
+                            <th class="px-4 py-3 text-right">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+                        {% for competitor in competitors %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-4">
+                                    <div class="font-medium text-gray-900">
+                                        {{ competitor.name }}
+                                    </div>
+                                    {% if competitor.is_demo %}
+                                        <span class="mt-1 inline-block rounded bg-amber-50 px-2 py-1 text-xs text-amber-700">
+                                            Illustrative data
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-600">
+                                    {{ competitor.industry_name }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-600">
+                                    {{ competitor.headquarters or 'Not specified' }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-600">
+                                    {% if competitor.market_share is not none %}
+                                        {{ competitor.market_share }}%
+                                    {% else %}
+                                        Not available
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-600">
+                                    {{ competitor.relationship_count }}
+                                </td>
+
+                                <td class="px-4 py-4 text-right">
+                                    <a href="{{ url_for('competitors.competitor_detail', competitor_id=competitor.id) }}"
+                                       class="text-sm font-medium text-blue-700 hover:text-blue-900">
+                                        View profile →
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if total_pages > 1 %}
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                    <p class="text-sm text-gray-500">
+                        Showing page {{ page }} of {{ total_pages }}
+                    </p>
+
+                    <div class="flex gap-2">
+                        {% if page > 1 %}
+                            <a href="{{ url_for('competitors.competitor_directory', page=page-1, search=search, industry_id=selected_industry_id) }}"
+                               class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Previous
+                            </a>
+                        {% endif %}
+
+                        {% if page < total_pages %}
+                            <a href="{{ url_for('competitors.competitor_directory', page=page+1, search=search, industry_id=selected_industry_id) }}"
+                               class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                Next
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="py-12 text-center">
+                <h4 class="text-base font-semibold text-gray-800">
+                    No competitors found
+                </h4>
+                <p class="mt-2 text-sm text-gray-500">
+                    No competitor records match the selected filters.
+                    Try changing your search or industry selection.
+                </p>
+            </div>
+        {% endif %}
+    </section>
+
+    <p class="text-xs text-gray-400">
+        Competitor information should be supported by verifiable evidence.
+        Illustrative records are not representations of actual market data.
+    </p>
+
+</div>
+{% endblock %}

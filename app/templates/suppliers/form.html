@@ -1,0 +1,178 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Supply Chain Intelligence
+<span class="mx-2">/</span>
+<a href="{{ url_for('suppliers.index') }}" class="hover:text-blue-700">Supplier Network</a>
+<span class="mx-2">/</span> {{ page_title }}
+{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block page_subtitle %}
+Register supplier information and assess its supply-chain risk profile.
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl space-y-6">
+
+    <section class="content-card">
+        <div class="mb-5 border-b border-slate-100 pb-4">
+            <h2 class="text-base font-semibold text-slate-900">
+                Supplier Information
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+                Enter the supplier's identity, location, classification, and risk information.
+            </p>
+        </div>
+
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+
+            {% if form.errors %}
+            <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+                <p class="text-sm font-semibold text-red-800">
+                    Please correct the following errors:
+                </p>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+                    {% for field_name, errors in form.errors.items() %}
+                        {% for error in errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                    {{ form.name.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.name(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100", placeholder="Enter supplier name") }}
+                    {% for error in form.name.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.supplier_code.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.supplier_code(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100", placeholder="Unique supplier code") }}
+                    {% for error in form.supplier_code.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.parent_supplier_id.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.parent_supplier_id(class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm") }}
+                    {% for error in form.parent_supplier_id.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.supplier_type.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.supplier_type(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="e.g. Battery manufacturer") }}
+                    {% for error in form.supplier_type.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.country.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.country(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="Country") }}
+                    {% for error in form.country.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.headquarters.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.headquarters(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="City or headquarters address") }}
+                    {% for error in form.headquarters.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.tier_level.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.tier_level(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", min="1") }}
+                    {% for error in form.tier_level.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.risk_level.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.risk_level(class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm") }}
+                    {% for error in form.risk_level.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-5">
+                <h3 class="text-sm font-semibold text-slate-900">
+                    Risk Indicators
+                </h3>
+                <p class="mt-1 text-sm text-slate-500">
+                    Optional scores from 0 to 100. Use a consistent assessment methodology.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                    {{ form.financial_dependency_score.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.financial_dependency_score(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", min="0", max="100", step="0.1", placeholder="0–100") }}
+                    {% for error in form.financial_dependency_score.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.operational_risk_score.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.operational_risk_score(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", min="0", max="100", step="0.1", placeholder="0–100") }}
+                    {% for error in form.operational_risk_score.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                {{ form.description.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                {{ form.description(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", rows="4", placeholder="Describe the supplier, products, capabilities, or relevant context.") }}
+                {% for error in form.description.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="border-t border-slate-100 pt-5">
+                <label class="flex items-center gap-3 text-sm font-medium text-slate-700">
+                    {{ form.is_active(class="h-4 w-4 rounded border-slate-300 text-blue-700") }}
+                    Active Supplier
+                </label>
+                <p class="mt-1 text-xs text-slate-500">
+                    Inactive suppliers remain in the register for historical reference.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3 border-t border-slate-100 pt-5">
+                <button type="submit"
+                        class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                    {{ submit_label }}
+                </button>
+
+                <a href="{{ url_for('suppliers.index') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </section>
+
+</div>
+
+{% endblock %}

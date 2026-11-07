@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if mode == 'edit' %}Edit{% else %}New{% endif %} Value Chain Activity | StrategySim
+{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+
+{% block page_title %}
+    {% if mode == 'edit' %}Edit Activity{% else %}Add Activity{% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+Record activity details, cost contribution, strategic importance and competitive advantage.
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="mb-6 border-b border-gray-100 pb-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Assessment
+            </p>
+
+            <h2 class="mt-1 text-base font-semibold text-gray-900">
+                {{ assessment.assessment_name }}
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-500">
+                {{ assessment.company_name or 'Company not specified' }}
+            </p>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-5">
+                <label for="{{ form.activity_category.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Activity Category <span class="text-red-600">*</span>
+                </label>
+
+                {{ form.activity_category(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                ) }}
+
+                {% for error in form.activity_category.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Choose whether this activity belongs to Primary or Support Activities.
+                </p>
+            </div>
+
+            <div class="mb-5">
+                <label for="{{ form.activity_name.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Activity Name <span class="text-red-600">*</span>
+                </label>
+
+                {{ form.activity_name(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Enter the activity name"
+                ) }}
+
+                {% for error in form.activity_name.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="mb-5">
+                <label for="{{ form.description.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Description
+                </label>
+
+                {{ form.description(
+                    rows="4",
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Describe the activity and its role in the value chain..."
+                ) }}
+
+                {% for error in form.description.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <div>
+                    <label for="{{ form.cost_contribution.id }}"
+                           class="mb-2 block text-sm font-medium text-gray-700">
+                        Cost Contribution
+                    </label>
+
+                    {{ form.cost_contribution(
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                        placeholder="e.g. 25.50",
+                        min="0",
+                        step="0.01"
+                    ) }}
+
+                    {% for error in form.cost_contribution.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Enter a non-negative value using your chosen cost unit consistently.
+                    </p>
+                </div>
+
+                <div>
+                    <label for="{{ form.strategic_importance.id }}"
+                           class="mb-2 block text-sm font-medium text-gray-700">
+                        Strategic Importance
+                    </label>
+
+                    {{ form.strategic_importance(
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                        placeholder="1 to 5",
+                        min="1",
+                        max="5",
+                        step="1"
+                    ) }}
+
+                    {% for error in form.strategic_importance.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Scale: 1 = Low, 5 = High.
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="mb-5">
+                <label for="{{ form.competitive_advantage.id }}"
+                       class="mb-2 block text-sm font-medium text-gray-700">
+                    Competitive Advantage
+                </label>
+
+                {{ form.competitive_advantage(
+                    rows="4",
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Explain how this activity contributes to competitive advantage..."
+                ) }}
+
+                {% for error in form.competitive_advantage.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Evidence Association -->
+
+            <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+
+                <h3 class="text-sm font-semibold text-gray-900">
+                    Evidence Association
+                </h3>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Optionally associate an existing Evidence Management record with this activity.
+                </p>
+
+                <div class="mt-4">
+                    <label for="{{ form.evidence_id.id }}"
+                           class="mb-2 block text-sm font-medium text-gray-700">
+                        Select Evidence
+                    </label>
+
+                    <select id="{{ form.evidence_id.id }}"
+                            name="{{ form.evidence_id.name }}"
+                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
+
+                        <option value="">No evidence selected</option>
+
+                        {% for record in evidence_records %}
+                        <option value="{{ record.id }}"
+                            {% if form.evidence_id.data|string == record.id|string %}
+                                selected
+                            {% endif %}>
+                            {{ record.title }} — {{ record.source_type }}
+                            {% if record.source_name %}
+                                ({{ record.source_name }})
+                            {% endif %}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+
+                    {% for error in form.evidence_id.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                    {% if not evidence_records %}
+                    <p class="mt-2 text-xs text-gray-500">
+                        No evidence records are currently available. You can add evidence through Evidence Management.
+                    </p>
+                    {% endif %}
+
+                    {% if mode == 'edit' and activity.evidence_title %}
+                    <p class="mt-2 text-xs text-gray-600">
+                        Currently associated evidence: {{ activity.evidence_title }}.
+                        Leave the selection unchanged to retain the current association.
+                    </p>
+                    {% endif %}
+
+                    <a href="{{ url_for('evidence.index') }}"
+                       class="mt-3 inline-flex text-xs font-medium text-blue-600 hover:text-blue-800">
+                        Open Evidence Management →
+                    </a>
+
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5">
+
+                <a href="{{ url_for('value_chain.detail', assessment_id=assessment.id) }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+                    {% if mode == 'edit' %}Update Activity{% else %}Add Activity{% endif %}
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

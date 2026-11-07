@@ -1,0 +1,411 @@
+
+<aside id="appSidebar" class="app-sidebar">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <a href="{{ url_for('dashboard.dashboard_home') }}"
+        class="flex items-center gap-3">
+
+            <!-- StrategySim Logo -->
+            <img
+                src="{{ url_for('static', filename='images/strategysim-logo.png') }}"
+                alt="StrategySim Logo"
+                class="sidebar-brand-logo"
+            >
+
+            <!-- Brand Name -->
+            <div>
+                <div class="text-lg font-bold tracking-tight text-slate-900">
+                    StrategySim
+                </div>
+
+                <div class="text-xs text-slate-500">
+                    Strategic Intelligence
+                </div>
+            </div>
+
+        </a>
+
+        <!-- Mobile Close Button -->
+        <button type="button"
+                id="sidebarClose"
+                class="sidebar-mobile-close"
+                aria-label="Close navigation">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+                <path d="m18 6-12 12M6 6l12 12"/>
+            </svg>
+
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-navigation">
+
+        <!-- Overview -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Overview</div>
+
+            <a href="{{ url_for('dashboard.dashboard_home') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.dashboard_home' %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <rect x="3" y="3" width="8" height="8" rx="1"/>
+                        <rect x="13" y="3" width="8" height="5" rx="1"/>
+                        <rect x="13" y="10" width="8" height="11" rx="1"/>
+                        <rect x="3" y="13" width="8" height="8" rx="1"/>
+                    </svg>
+                </span>
+
+                <span>Dashboard</span>
+
+                {% if request.endpoint == 'dashboard.dashboard_home' %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+        </div>
+
+        <!-- Intelligence -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Intelligence</div>
+
+            <!-- Company Intelligence -->
+            <a href="{{ url_for('companies.company_directory') }}"
+               class="sidebar-link {% if request.endpoint and request.endpoint.startswith('companies.') %}active{% endif %}">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <rect x="3" y="7" width="18" height="14" rx="2"/>
+                        <path d="M8 7V4h8v3"/>
+                        <path d="M3 12h18"/>
+                        <path d="M10 12v2h4v-2"/>
+                    </svg>
+                </span>
+                <span>Company Intelligence</span>
+            </a>
+
+            <!-- Competitor Analysis -->
+            <a href="{{ url_for('competitors.competitor_directory') }}"
+               class="sidebar-link {% if request.endpoint and request.endpoint.startswith('competitors.') %}active{% endif %}">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <circle cx="9" cy="8" r="3"/>
+                        <circle cx="17" cy="9" r="2.5"/>
+                        <path d="M3 20v-1a6 6 0 0 1 12 0v1"/>
+                        <path d="M16 15a5 5 0 0 1 5 5"/>
+                    </svg>
+                </span>
+                <span>Competitor Analysis</span>
+            </a>
+        </div>
+
+
+        <!-- Strategic Analysis -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Strategic Analysis</div>
+
+            <!-- SWOT Analysis -->
+            <a href="{{ url_for('swot.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('swot.') %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8">
+                        <rect x="3" y="3" width="8" height="8" rx="1"/>
+                        <rect x="13" y="3" width="8" height="8" rx="1"/>
+                        <rect x="3" y="13" width="8" height="8" rx="1"/>
+                        <rect x="13" y="13" width="8" height="8" rx="1"/>
+                    </svg>
+                </span>
+
+                <span>SWOT Analysis</span>
+
+                {% if request.endpoint and request.endpoint.startswith('swot.') %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+
+            <!-- Porter's Five Forces -->
+            <a href="{{ url_for('five_forces.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('five_forces.') %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 3v18"/>
+                        <path d="M3 12h18"/>
+                        <path d="M5.6 5.6l12.8 12.8"/>
+                        <path d="M18.4 5.6L5.6 18.4"/>
+                    </svg>
+                </span>
+
+                <span>Porter's Five Forces</span>
+
+                {% if request.endpoint and request.endpoint.startswith('five_forces.') %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+
+            <!-- Value Chain Analysis -->
+            <a href="{{ url_for('value_chain.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('value_chain.') %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <rect x="2.5" y="4" width="7" height="6" rx="1"/>
+                        <rect x="14.5" y="14" width="7" height="6" rx="1"/>
+                        <path d="M9.5 7h3a3 3 0 0 1 3 3v4"/>
+                        <path d="m12.5 11 3 3 3-3"/>
+                    </svg>
+                </span>
+
+                <span>Value Chain Analysis</span>
+
+                {% if request.endpoint and request.endpoint.startswith('value_chain.') %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+        </div>
+
+
+        <!-- Supply Chain Intelligence -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Supply Chain Intelligence</div>
+
+            <a href="{{ url_for('suppliers.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('suppliers.') %}active{% endif %}">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8">
+                        <circle cx="5" cy="6" r="2"/>
+                        <circle cx="19" cy="6" r="2"/>
+                        <circle cx="12" cy="18" r="2"/>
+                        <path d="m7 7 4 9M17 7l-4 9M7 6h10"/>
+                    </svg>
+                </span>
+                <span>Supplier Network</span>
+            </a>
+
+            <a href="{{ url_for('dependency_analysis.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('dependency_analysis.') %}active{% endif %}">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M4 19V5"/>
+                        <path d="M4 19h16"/>
+                        <path d="m7 15 4-4 3 3 5-7"/>
+                    </svg>
+                </span>
+                <span>Dependency Analysis</span>
+            </a>
+        </div>
+
+        <!-- Decision Support -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Decision Support</div>
+
+            <a href="{{ url_for('scenario_simulator.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('scenario_simulator.') %}active{% endif %}">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M12 3v18"/>
+                        <path d="M5 7h14"/>
+                        <path d="m7 7-4 7h8L7 7Z"/>
+                        <path d="m17 7-4 7h8l-4-7Z"/>
+                    </svg>
+                </span>
+                <span>Scenario Simulator</span>
+            </a>
+
+            <a href="{{ url_for('strategic_decisions.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('strategic_decisions.') %}active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M12 3v18"/>
+                        <path d="M3 12h18"/>
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="m8 12 2.5 2.5L16 9"/>
+                    </svg>
+                </span>
+
+                <span>Strategic Decisions</span>
+
+            </a>
+
+        <!-- End Decision Support -->
+
+        <!-- Resources -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Resources</div>
+
+            <a href="{{ url_for('reports.index') }}"
+            class="sidebar-link {% if request.endpoint and request.endpoint.startswith('reports.') %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8M8 12h8M8 16h5"/>
+                    </svg>
+                </span>
+
+                <span>Reports</span>
+
+                {% if request.endpoint and request.endpoint.startswith('reports.') %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+
+            </a>
+        </div>
+
+
+        <!-- Administration: Administrators only -->
+        {% if current_user.is_administrator %}
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Administration</div>
+
+            <!-- User Management -->
+            <a href="{{ url_for('users.user_directory_page') }}"
+               class="sidebar-link {% if request.endpoint in ['users.user_directory_page', 'users.create_user', 'users.edit_user'] %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="10" cy="7" r="4"/>
+                        <path d="M20 8v6M17 11h6"/>
+                    </svg>
+                </span>
+
+                <span>User Management</span>
+
+                {% if request.endpoint in ['users.user_directory_page', 'users.create_user', 'users.edit_user'] %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+
+            <!-- Create User -->
+            <a href="{{ url_for('users.create_user') }}"
+               class="sidebar-link {% if request.endpoint == 'users.create_user' %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <circle cx="9" cy="8" r="4"/>
+                        <path d="M3 21v-2a6 6 0 0 1 12 0v2"/>
+                        <path d="M19 8v6M16 11h6"/>
+                    </svg>
+                </span>
+
+                <span>Create User</span>
+
+                {% if request.endpoint == 'users.create_user' %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+
+            <!-- Audit Logs -->
+            <a href="{{ url_for('users.audit_page') }}"
+               class="sidebar-link {% if request.endpoint == 'users.audit_page' %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M8 3h8l4 4v14H4V3h4Z"/>
+                        <path d="M8 11h8M8 15h8M8 7h3"/>
+                    </svg>
+                </span>
+
+                <span>Audit Logs</span>
+
+                {% if request.endpoint == 'users.audit_page' %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+        </div>
+        {% endif %}
+
+    </nav>
+
+    <!-- Sidebar Footer / Current User -->
+    <div class="sidebar-bottom">
+        <div class="sidebar-user-panel">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
+                    {{ current_user.full_name[:1]|upper }}
+                </div>
+
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-semibold text-slate-800">
+                        {{ current_user.full_name }}
+                    </p>
+                    <p class="truncate text-xs text-slate-500">
+                        {{ current_user.role }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</aside>

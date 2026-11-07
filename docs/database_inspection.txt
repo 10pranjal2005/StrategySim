@@ -1,0 +1,1280 @@
+===========================================================================
+STRATEGYSIM DATABASE INSPECTION
+===========================================================================
+
+TOTAL TABLES FOUND: 22
+
+---------------------------------------------------------------------------
+TABLE: audit_logs
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: user_id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: action | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: entity_type | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: entity_id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: ip_address | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  user_id -> users.id | On Update: NO ACTION | On Delete: SET NULL
+
+INDEXES:
+  Name: idx_audit_logs_created | Unique: 0
+  Name: idx_audit_logs_user | Unique: 0
+
+RECORD COUNT: 6
+
+CREATE TABLE SQL:
+CREATE TABLE audit_logs (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    action TEXT NOT NULL,
+
+    entity_type TEXT,
+
+    entity_id INTEGER,
+
+    description TEXT,
+
+    ip_address TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: companies
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: industry_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: company_type | Type: TEXT | Not Null: 1 | Default: 'Target' | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: headquarters | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: website | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: annual_revenue | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: employee_count | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: market_share | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: founded_year | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: is_demo | Type: INTEGER | Not Null: 1 | Default: 0 | Primary Key: 0
+  Name: created_by | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  created_by -> users.id | On Update: NO ACTION | On Delete: SET NULL
+  industry_id -> industries.id | On Update: NO ACTION | On Delete: RESTRICT
+
+INDEXES:
+  Name: idx_companies_type | Unique: 0
+  Name: idx_companies_industry | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE companies (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    industry_id INTEGER NOT NULL,
+
+    name TEXT NOT NULL,
+
+    company_type TEXT NOT NULL DEFAULT 'Target'
+        CHECK (company_type IN ('Target', 'Competitor', 'Other')),
+
+    description TEXT,
+
+    headquarters TEXT,
+
+    website TEXT,
+
+    annual_revenue REAL,
+
+    employee_count INTEGER,
+
+    market_share REAL,
+
+    founded_year INTEGER,
+
+    is_demo INTEGER NOT NULL DEFAULT 0
+        CHECK (is_demo IN (0, 1)),
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (industry_id)
+        REFERENCES industries(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: competitor_relationships
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: company_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: competitor_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: competitive_strength | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: notes | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  competitor_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+  company_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_competitors_company | Unique: 0
+  Name: sqlite_autoindex_competitor_relationships_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE competitor_relationships (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    competitor_id INTEGER NOT NULL,
+
+    competitive_strength INTEGER
+        CHECK (
+            competitive_strength IS NULL
+            OR competitive_strength BETWEEN 1 AND 5
+        ),
+
+    notes TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (competitor_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    CHECK (company_id != competitor_id),
+
+    UNIQUE(company_id, competitor_id)
+
+)
+
+---------------------------------------------------------------------------
+TABLE: components
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: component_code | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: category | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: criticality | Type: TEXT | Not Null: 0 | Default: 'Medium' | Primary Key: 0
+  Name: is_active | Type: INTEGER | Not Null: 1 | Default: 1 | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  No foreign keys
+
+INDEXES:
+  Name: sqlite_autoindex_components_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE components (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL,
+
+    component_code TEXT UNIQUE,
+
+    category TEXT,
+
+    description TEXT,
+
+    criticality TEXT DEFAULT 'Medium'
+        CHECK (criticality IN ('Low', 'Medium', 'High', 'Critical')),
+
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+)
+
+---------------------------------------------------------------------------
+TABLE: decision_criteria
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: matrix_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: criterion_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: weight | Type: REAL | Not Null: 1 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  matrix_id -> decision_matrices.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_decision_criteria_matrix | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE decision_criteria (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    matrix_id INTEGER NOT NULL,
+
+    criterion_name TEXT NOT NULL,
+
+    weight REAL NOT NULL
+        CHECK (weight >= 0),
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (matrix_id)
+        REFERENCES decision_matrices(id)
+        ON DELETE CASCADE
+
+)
+
+---------------------------------------------------------------------------
+TABLE: decision_matrices
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: company_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: matrix_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: objective | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_by | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  created_by -> users.id | On Update: NO ACTION | On Delete: SET NULL
+  company_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_decision_matrices_company | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE decision_matrices (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    matrix_name TEXT NOT NULL,
+
+    objective TEXT,
+
+    description TEXT,
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: decision_options
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: matrix_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: option_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  matrix_id -> decision_matrices.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_decision_options_matrix | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE decision_options (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    matrix_id INTEGER NOT NULL,
+
+    option_name TEXT NOT NULL,
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (matrix_id)
+        REFERENCES decision_matrices(id)
+        ON DELETE CASCADE
+
+)
+
+---------------------------------------------------------------------------
+TABLE: decision_scores
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: option_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: criterion_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: score | Type: REAL | Not Null: 1 | Default: None | Primary Key: 0
+  Name: weighted_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: justification | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  criterion_id -> decision_criteria.id | On Update: NO ACTION | On Delete: CASCADE
+  option_id -> decision_options.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_decision_scores_option | Unique: 0
+  Name: sqlite_autoindex_decision_scores_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE decision_scores (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    option_id INTEGER NOT NULL,
+
+    criterion_id INTEGER NOT NULL,
+
+    score REAL NOT NULL
+        CHECK (score BETWEEN 1 AND 5),
+
+    weighted_score REAL,
+
+    justification TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (option_id)
+        REFERENCES decision_options(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (criterion_id)
+        REFERENCES decision_criteria(id)
+        ON DELETE CASCADE,
+
+    UNIQUE(option_id, criterion_id)
+
+)
+
+---------------------------------------------------------------------------
+TABLE: evidence
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: title | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: source_type | Type: TEXT | Not Null: 1 | Default: 'Manual' | Primary Key: 0
+  Name: source_name | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: source_url | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: file_path | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: entity_type | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: entity_id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: reliability_score | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: uploaded_by | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  uploaded_by -> users.id | On Update: NO ACTION | On Delete: SET NULL
+
+INDEXES:
+  Name: idx_evidence_entity | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE evidence (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    title TEXT NOT NULL,
+
+    description TEXT,
+
+    source_type TEXT NOT NULL DEFAULT 'Manual'
+        CHECK (
+            source_type IN (
+                'Manual',
+                'CSV Import',
+                'External Source',
+                'Internal Research',
+                'Document'
+            )
+        ),
+
+    source_name TEXT,
+
+    source_url TEXT,
+
+    file_path TEXT,
+
+    entity_type TEXT,
+
+    entity_id INTEGER,
+
+    reliability_score INTEGER
+        CHECK (
+            reliability_score IS NULL
+            OR reliability_score BETWEEN 1 AND 5
+        ),
+
+    uploaded_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (uploaded_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: facilities
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: supplier_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: facility_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: facility_type | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: country | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: city | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: capacity_description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: operational_status | Type: TEXT | Not Null: 0 | Default: 'Active' | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  supplier_id -> suppliers.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  No indexes
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE facilities (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    supplier_id INTEGER NOT NULL,
+
+    facility_name TEXT NOT NULL,
+
+    facility_type TEXT,
+
+    country TEXT,
+
+    city TEXT,
+
+    capacity_description TEXT,
+
+    operational_status TEXT DEFAULT 'Active'
+        CHECK (
+            operational_status IN (
+                'Active',
+                'Inactive',
+                'Disrupted'
+            )
+        ),
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE
+
+)
+
+---------------------------------------------------------------------------
+TABLE: five_forces_assessments
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: company_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: assessment_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: assessment_date | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: buyer_power_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: supplier_power_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: competitive_rivalry_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: threat_of_substitution_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: threat_of_new_entrants_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: overall_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: summary | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_by | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  created_by -> users.id | On Update: NO ACTION | On Delete: SET NULL
+  company_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_five_forces_company | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE five_forces_assessments (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    assessment_name TEXT NOT NULL,
+
+    assessment_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    buyer_power_score REAL,
+
+    supplier_power_score REAL,
+
+    competitive_rivalry_score REAL,
+
+    threat_of_substitution_score REAL,
+
+    threat_of_new_entrants_score REAL,
+
+    overall_score REAL,
+
+    summary TEXT,
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: five_forces_indicators
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: assessment_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: force_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: indicator_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: score | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: weight | Type: REAL | Not Null: 1 | Default: 1 | Primary Key: 0
+  Name: explanation | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: evidence_id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  assessment_id -> five_forces_assessments.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_five_forces_indicators_assessment | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE five_forces_indicators (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    assessment_id INTEGER NOT NULL,
+
+    force_name TEXT NOT NULL
+        CHECK (
+            force_name IN (
+                'Buyer Power',
+                'Supplier Power',
+                'Competitive Rivalry',
+                'Threat of Substitution',
+                'Threat of New Entrants'
+            )
+        ),
+
+    indicator_name TEXT NOT NULL,
+
+    score INTEGER NOT NULL
+        CHECK (score BETWEEN 1 AND 5),
+
+    weight REAL NOT NULL DEFAULT 1
+        CHECK (weight > 0),
+
+    explanation TEXT,
+
+    evidence_id INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (assessment_id)
+        REFERENCES five_forces_assessments(id)
+        ON DELETE CASCADE
+
+)
+
+---------------------------------------------------------------------------
+TABLE: industries
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: sector | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: geography | Type: TEXT | Not Null: 0 | Default: 'India' | Primary Key: 0
+  Name: industry_type | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  No foreign keys
+
+INDEXES:
+  Name: sqlite_autoindex_industries_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE industries (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL,
+
+    sector TEXT,
+
+    description TEXT,
+
+    geography TEXT DEFAULT 'India',
+
+    industry_type TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(name, geography)
+
+)
+
+---------------------------------------------------------------------------
+TABLE: procurement_records
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: company_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: supplier_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: component_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: annual_spend | Type: REAL | Not Null: 1 | Default: 0 | Primary Key: 0
+  Name: spend_share_percent | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: quantity | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: unit_cost | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: contract_start_date | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: contract_end_date | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: contract_status | Type: TEXT | Not Null: 0 | Default: 'Active' | Primary Key: 0
+  Name: recorded_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  component_id -> components.id | On Update: NO ACTION | On Delete: RESTRICT
+  supplier_id -> suppliers.id | On Update: NO ACTION | On Delete: RESTRICT
+  company_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_procurement_component | Unique: 0
+  Name: idx_procurement_supplier | Unique: 0
+  Name: idx_procurement_company | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE procurement_records (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    supplier_id INTEGER NOT NULL,
+
+    component_id INTEGER NOT NULL,
+
+    annual_spend REAL NOT NULL DEFAULT 0
+        CHECK (annual_spend >= 0),
+
+    spend_share_percent REAL
+        CHECK (
+            spend_share_percent IS NULL
+            OR spend_share_percent BETWEEN 0 AND 100
+        ),
+
+    quantity REAL,
+
+    unit_cost REAL,
+
+    contract_start_date TEXT,
+
+    contract_end_date TEXT,
+
+    contract_status TEXT DEFAULT 'Active'
+        CHECK (
+            contract_status IN (
+                'Active',
+                'Expired',
+                'Pending',
+                'Terminated'
+            )
+        ),
+
+    recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (component_id)
+        REFERENCES components(id)
+        ON DELETE RESTRICT
+
+)
+
+---------------------------------------------------------------------------
+TABLE: scenario_results
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: scenario_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: result_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: baseline_value | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: simulated_value | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: change_value | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: change_percent | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: interpretation | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: result_data_json | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  scenario_id -> scenarios.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_scenario_results_scenario | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE scenario_results (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    scenario_id INTEGER NOT NULL,
+
+    result_name TEXT NOT NULL,
+
+    baseline_value REAL,
+
+    simulated_value REAL,
+
+    change_value REAL,
+
+    change_percent REAL,
+
+    interpretation TEXT,
+
+    result_data_json TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (scenario_id)
+        REFERENCES scenarios(id)
+        ON DELETE CASCADE
+
+)
+
+---------------------------------------------------------------------------
+TABLE: scenarios
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: company_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: scenario_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: scenario_type | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: parameters_json | Type: TEXT | Not Null: 1 | Default: '{}' | Primary Key: 0
+  Name: baseline_metrics_json | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: status | Type: TEXT | Not Null: 1 | Default: 'Draft' | Primary Key: 0
+  Name: created_by | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  created_by -> users.id | On Update: NO ACTION | On Delete: SET NULL
+  company_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_scenarios_company | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE scenarios (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    scenario_name TEXT NOT NULL,
+
+    scenario_type TEXT NOT NULL,
+
+    description TEXT,
+
+    parameters_json TEXT NOT NULL DEFAULT '{}',
+
+    baseline_metrics_json TEXT,
+
+    status TEXT NOT NULL DEFAULT 'Draft'
+        CHECK (
+            status IN (
+                'Draft',
+                'Simulated',
+                'Archived'
+            )
+        ),
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: supplier_components
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: supplier_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: component_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: unit_cost | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: lead_time_days | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: dependency_share_percent | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: is_alternative | Type: INTEGER | Not Null: 1 | Default: 0 | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  component_id -> components.id | On Update: NO ACTION | On Delete: CASCADE
+  supplier_id -> suppliers.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_supplier_components_component | Unique: 0
+  Name: idx_supplier_components_supplier | Unique: 0
+  Name: sqlite_autoindex_supplier_components_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE supplier_components (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    supplier_id INTEGER NOT NULL,
+
+    component_id INTEGER NOT NULL,
+
+    unit_cost REAL,
+
+    lead_time_days INTEGER,
+
+    dependency_share_percent REAL
+        CHECK (
+            dependency_share_percent IS NULL
+            OR dependency_share_percent BETWEEN 0 AND 100
+        ),
+
+    is_alternative INTEGER NOT NULL DEFAULT 0
+        CHECK (is_alternative IN (0, 1)),
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (component_id)
+        REFERENCES components(id)
+        ON DELETE CASCADE,
+
+    UNIQUE(supplier_id, component_id)
+
+)
+
+---------------------------------------------------------------------------
+TABLE: supplier_relationships
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: source_supplier_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: target_supplier_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: relationship_type | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: dependency_strength | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  target_supplier_id -> suppliers.id | On Update: NO ACTION | On Delete: CASCADE
+  source_supplier_id -> suppliers.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_supplier_relationship_target | Unique: 0
+  Name: idx_supplier_relationship_source | Unique: 0
+  Name: sqlite_autoindex_supplier_relationships_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE supplier_relationships (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    source_supplier_id INTEGER NOT NULL,
+
+    target_supplier_id INTEGER NOT NULL,
+
+    relationship_type TEXT NOT NULL,
+
+    dependency_strength REAL
+        CHECK (
+            dependency_strength IS NULL
+            OR dependency_strength BETWEEN 0 AND 100
+        ),
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (source_supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (target_supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE,
+
+    CHECK (source_supplier_id != target_supplier_id),
+
+    UNIQUE(
+        source_supplier_id,
+        target_supplier_id,
+        relationship_type
+    )
+
+)
+
+---------------------------------------------------------------------------
+TABLE: suppliers
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: supplier_code | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: parent_supplier_id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: country | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: headquarters | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: supplier_type | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: tier_level | Type: INTEGER | Not Null: 1 | Default: 1 | Primary Key: 0
+  Name: risk_level | Type: TEXT | Not Null: 0 | Default: 'Medium' | Primary Key: 0
+  Name: financial_dependency_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: operational_risk_score | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: is_active | Type: INTEGER | Not Null: 1 | Default: 1 | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  parent_supplier_id -> suppliers.id | On Update: NO ACTION | On Delete: SET NULL
+
+INDEXES:
+  Name: idx_suppliers_parent | Unique: 0
+  Name: sqlite_autoindex_suppliers_1 | Unique: 1
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE suppliers (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL,
+
+    supplier_code TEXT UNIQUE,
+
+    parent_supplier_id INTEGER,
+
+    country TEXT,
+
+    headquarters TEXT,
+
+    supplier_type TEXT,
+
+    tier_level INTEGER NOT NULL DEFAULT 1
+        CHECK (tier_level >= 1),
+
+    risk_level TEXT DEFAULT 'Medium'
+        CHECK (risk_level IN ('Low', 'Medium', 'High', 'Critical')),
+
+    financial_dependency_score REAL,
+
+    operational_risk_score REAL,
+
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (parent_supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE SET NULL
+
+)
+
+---------------------------------------------------------------------------
+TABLE: users
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: full_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: email | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: password_hash | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: role | Type: TEXT | Not Null: 1 | Default: 'Viewer' | Primary Key: 0
+  Name: is_active | Type: INTEGER | Not Null: 1 | Default: 1 | Primary Key: 0
+  Name: last_login_at | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: updated_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  No foreign keys
+
+INDEXES:
+  Name: sqlite_autoindex_users_1 | Unique: 1
+
+RECORD COUNT: 3
+
+CREATE TABLE SQL:
+CREATE TABLE users (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    full_name TEXT NOT NULL,
+
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+
+    password_hash TEXT NOT NULL,
+
+    role TEXT NOT NULL DEFAULT 'Viewer'
+        CHECK (role IN ('Administrator', 'Analyst', 'Viewer')),
+
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+
+    last_login_at TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+)
+
+---------------------------------------------------------------------------
+TABLE: value_chain_activities
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: assessment_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: activity_category | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: activity_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: description | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: cost_contribution | Type: REAL | Not Null: 0 | Default: None | Primary Key: 0
+  Name: strategic_importance | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: competitive_advantage | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  assessment_id -> value_chain_assessments.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_value_chain_activities_assessment | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE value_chain_activities (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    assessment_id INTEGER NOT NULL,
+
+    activity_category TEXT NOT NULL
+        CHECK (
+            activity_category IN ('Primary', 'Support')
+        ),
+
+    activity_name TEXT NOT NULL,
+
+    description TEXT,
+
+    cost_contribution REAL,
+
+    strategic_importance INTEGER
+        CHECK (
+            strategic_importance IS NULL
+            OR strategic_importance BETWEEN 1 AND 5
+        ),
+
+    competitive_advantage TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (assessment_id)
+        REFERENCES value_chain_assessments(id)
+        ON DELETE CASCADE
+
+)
+
+---------------------------------------------------------------------------
+TABLE: value_chain_assessments
+---------------------------------------------------------------------------
+
+COLUMNS:
+  Name: id | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 1
+  Name: company_id | Type: INTEGER | Not Null: 1 | Default: None | Primary Key: 0
+  Name: assessment_name | Type: TEXT | Not Null: 1 | Default: None | Primary Key: 0
+  Name: assessment_date | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+  Name: summary | Type: TEXT | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_by | Type: INTEGER | Not Null: 0 | Default: None | Primary Key: 0
+  Name: created_at | Type: TEXT | Not Null: 1 | Default: CURRENT_TIMESTAMP | Primary Key: 0
+
+FOREIGN KEYS:
+  created_by -> users.id | On Update: NO ACTION | On Delete: SET NULL
+  company_id -> companies.id | On Update: NO ACTION | On Delete: CASCADE
+
+INDEXES:
+  Name: idx_value_chain_company | Unique: 0
+
+RECORD COUNT: 0
+
+CREATE TABLE SQL:
+CREATE TABLE value_chain_assessments (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    assessment_name TEXT NOT NULL,
+
+    assessment_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    summary TEXT,
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+)
+
+===========================================================================
+DATABASE INTEGRITY CHECK
+===========================================================================
+Integrity: [('ok',)]
+Foreign Key Violations: []

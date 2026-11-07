@@ -1,0 +1,177 @@
+
+{% extends "base.html" %}
+
+{% block title %}Create Industry | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Workspace <span class="mx-2">/</span>
+<a href="{{ url_for('companies.company_directory') }}"
+   class="hover:text-blue-700">Company Intelligence</a>
+<span class="mx-2">/</span>
+<a href="{{ url_for('companies.industry_directory') }}"
+   class="hover:text-blue-700">Industries</a>
+<span class="mx-2">/</span> Create Industry
+{% endblock %}
+
+{% block page_title %}Create Industry{% endblock %}
+
+{% block page_subtitle %}
+Register an industry to organize companies and support strategic analysis.
+{% endblock %}
+
+{% block content %}
+
+<div class="mx-auto max-w-4xl space-y-6">
+
+    <!-- Introduction -->
+    <section class="content-card">
+
+        <div>
+            <h2 class="text-lg font-semibold text-slate-900">
+                Industry Information
+            </h2>
+
+            <p class="mt-1 text-sm leading-6 text-slate-500">
+                Provide the basic information for the industry you want
+                to register in the StrategySim workspace.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- Industry creation form -->
+    <section class="content-card">
+
+        <form method="POST"
+              action="{{ url_for('companies.create_industry') }}"
+              class="space-y-6">
+
+            {{ form.hidden_tag() }}
+
+            <!-- Industry name -->
+            <div>
+                {{ form.name.label(class="mb-2 block text-sm font-medium text-slate-700") }}
+
+                {{ form.name(
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100",
+                    placeholder="Enter industry name"
+                ) }}
+
+                {% for error in form.name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
+            <!-- Sector and industry type -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <div>
+                    {{ form.sector.label(class="mb-2 block text-sm font-medium text-slate-700") }}
+
+                    {{ form.sector(
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100",
+                        placeholder="e.g. Automotive"
+                    ) }}
+
+                    {% for error in form.sector.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+
+                <div>
+                    {{ form.industry_type.label(class="mb-2 block text-sm font-medium text-slate-700") }}
+
+                    {{ form.industry_type(
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100",
+                        placeholder="e.g. Electric Two-Wheeler"
+                    ) }}
+
+                    {% for error in form.industry_type.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+
+            <!-- Geography -->
+            <div>
+                {{ form.geography.label(class="mb-2 block text-sm font-medium text-slate-700") }}
+
+                {{ form.geography(
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                ) }}
+
+                <p class="mt-1 text-xs text-slate-400">
+                    Specify the geographical market covered by this industry.
+                </p>
+
+                {% for error in form.geography.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
+            <!-- Description -->
+            <div>
+                {{ form.description.label(class="mb-2 block text-sm font-medium text-slate-700") }}
+
+                {{ form.description(
+                    rows="5",
+                    class="w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100",
+                    placeholder="Describe the industry, its scope, major activities, and relevant characteristics..."
+                ) }}
+
+                <div class="mt-1 flex justify-between gap-3">
+                    <p class="text-xs text-slate-400">
+                        Optional. Maximum 5000 characters.
+                    </p>
+                </div>
+
+                {% for error in form.description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
+            <!-- Form actions -->
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+
+                <a href="{{ url_for('companies.company_directory') }}"
+                   class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                    Cancel
+                </a>
+
+                {{ form.submit(
+                    class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                ) }}
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- Guidance -->
+    <div class="rounded-lg border border-blue-100 bg-blue-50/50 p-4">
+
+        <h3 class="text-sm font-semibold text-slate-800">
+            Industry registration guidance
+        </h3>
+
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-600">
+            <li>Use a clear and recognizable industry name.</li>
+            <li>Specify the relevant sector and industry classification where applicable.</li>
+            <li>Use the appropriate geographical scope.</li>
+            <li>Keep the description factual and supported by reliable information.</li>
+        </ul>
+
+    </div>
+
+</div>
+
+{% endblock %}

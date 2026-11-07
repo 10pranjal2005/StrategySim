@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="StrategySim - Strategic Intelligence, Competitive Analysis and Decision Support System">
+
+    <meta name="theme-color" content="#f8fafc">
+
+    <title>{% block title %}StrategySim{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind theme configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: "#eef2ff",
+                            100: "#e0e7ff",
+                            500: "#4f46e5",
+                            600: "#4338ca",
+                            700: "#3730a3",
+                            900: "#1e1b4b"
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Application stylesheet -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/app.css') }}"
+    >
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
+
+    {% if current_user.is_authenticated %}
+
+        <!-- Mobile sidebar backdrop -->
+        <div
+            id="sidebarBackdrop"
+            class="sidebar-backdrop"
+            aria-hidden="true">
+        </div>
+
+        <div class="min-h-screen">
+
+            <!-- Main sidebar -->
+            {% include "partials/sidebar.html" %}
+
+            <!-- Main application area -->
+            <div class="main-content-area">
+
+                <!-- Top navigation bar -->
+                {% include "partials/topbar.html" %}
+
+                <!-- Main page content -->
+                <main class="px-4 py-6 sm:px-6 lg:px-8">
+
+                    <!-- Page heading -->
+                    <div class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+                        <div>
+                            <div class="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                StrategySim Workspace
+                            </div>
+
+                            <h1 class="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                                {% block page_title %}Workspace{% endblock %}
+                            </h1>
+
+                            <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                                {% block page_subtitle %}
+                                    Strategic intelligence and decision support.
+                                {% endblock %}
+                            </p>
+                        </div>
+
+                        <div class="flex shrink-0 items-center gap-2">
+                            {% block page_actions %}{% endblock %}
+                        </div>
+
+                    </div>
+
+                    <!-- Flash messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="mb-6 space-y-3" aria-live="polite">
+                                {% for category, message in messages %}
+
+                                    {% set alert_class = "border-slate-200 bg-white text-slate-700" %}
+
+                                    {% if category == "success" %}
+                                        {% set alert_class = "border-emerald-200 bg-emerald-50 text-emerald-800" %}
+                                    {% elif category == "error" or category == "danger" %}
+                                        {% set alert_class = "border-red-200 bg-red-50 text-red-800" %}
+                                    {% elif category == "warning" %}
+                                        {% set alert_class = "border-amber-200 bg-amber-50 text-amber-800" %}
+                                    {% elif category == "info" %}
+                                        {% set alert_class = "border-blue-200 bg-blue-50 text-blue-800" %}
+                                    {% endif %}
+
+                                    <div class="rounded-lg border px-4 py-3 text-sm {{ alert_class }}">
+                                        {{ message }}
+                                    </div>
+
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Child template content -->
+                    {% block content %}{% endblock %}
+
+                </main>
+
+                <!-- Footer -->
+                <footer class="border-t border-slate-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col gap-2 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+                        <span>StrategySim · Strategic Intelligence Platform</span>
+                        <span>Academic Project · Version 1.0</span>
+                    </div>
+                </footer>
+
+            </div>
+        </div>
+
+    {% else %}
+
+        <!-- Unauthenticated page layout -->
+        <main class="min-h-screen">
+            {% block public_content %}{% endblock %}
+        </main>
+
+    {% endif %}
+
+    <!-- Application JavaScript -->
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+        defer>
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,364 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ assessment.assessment_name }} | Five Forces | StrategySim{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+
+{% block page_title %}Porter's Five Forces{% endblock %}
+
+{% block page_subtitle %}
+    Competitive pressure assessment and industry analysis.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+        <div>
+            <h2 class="text-xl font-semibold text-gray-900">
+                {{ assessment.assessment_name }}
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-500">
+                {{ assessment.company_name or 'Company not available' }}
+                <span class="mx-2">|</span>
+                Assessment date: {{ assessment.assessment_date or 'Not specified' }}
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+
+            <a href="{{ url_for('five_forces.index') }}"
+               class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Back to Assessments
+            </a>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <a href="{{ url_for('five_forces.edit', assessment_id=assessment.id) }}"
+               class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                Edit Assessment
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Overall Score -->
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="text-sm font-medium text-gray-500">
+                    Overall Competitive Pressure
+                </h3>
+
+                <p class="mt-2 text-sm text-gray-600">
+                    Average of the five force scores, available after all five
+                    forces have at least one indicator.
+                </p>
+            </div>
+
+            <div class="text-left sm:text-right">
+
+                {% if assessment.overall_score is not none %}
+                    <p class="text-4xl font-bold text-gray-900">
+                        {{ "%.2f"|format(assessment.overall_score) }}
+                        <span class="text-lg font-medium text-gray-400">/ 5</span>
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Calculated score
+                    </p>
+                {% else %}
+                    <p class="text-2xl font-semibold text-gray-400">
+                        Pending
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Complete all five forces to calculate
+                    </p>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Five Force Scorecards -->
+    <div>
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">
+                Competitive Force Scores
+            </h3>
+
+            <p class="mt-1 text-sm text-gray-500">
+                Higher scores indicate stronger competitive pressure.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+            {% set force_scores = [
+                ('Buyer Power', assessment.buyer_power_score),
+                ('Supplier Power', assessment.supplier_power_score),
+                ('Competitive Rivalry', assessment.competitive_rivalry_score),
+                ('Threat of Substitution', assessment.threat_of_substitution_score),
+                ('Threat of New Entrants', assessment.threat_of_new_entrants_score)
+            ] %}
+
+            {% for force_name, force_score in force_scores %}
+            <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+
+                <p class="text-sm font-medium text-gray-600">
+                    {{ force_name }}
+                </p>
+
+                <div class="mt-3 flex items-end justify-between">
+
+                    {% if force_score is not none %}
+                        <p class="text-3xl font-bold text-gray-900">
+                            {{ "%.2f"|format(force_score) }}
+                            <span class="text-base font-medium text-gray-400">/ 5</span>
+                        </p>
+                    {% else %}
+                        <p class="text-xl font-semibold text-gray-400">
+                            Pending
+                        </p>
+                    {% endif %}
+
+                </div>
+
+                <div class="mt-4 h-2 overflow-hidden rounded-full bg-gray-100">
+                    {% if force_score is not none %}
+                        <div class="h-full rounded-full bg-blue-600"
+                             style="width: {{ (force_score / 5 * 100)|round(0) }}%">
+                        </div>
+                    {% else %}
+                        <div class="h-full w-0 rounded-full bg-blue-600"></div>
+                    {% endif %}
+                </div>
+
+                <p class="mt-2 text-xs text-gray-400">
+                    {% if force_score is not none %}
+                        {{ "%.0f"|format(force_score / 5 * 100) }}% of maximum pressure
+                    {% else %}
+                        No indicators recorded
+                    {% endif %}
+                </p>
+
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <!-- Assessment Summary -->
+    {% if assessment.summary %}
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <h3 class="text-base font-semibold text-gray-900">
+            Assessment Summary
+        </h3>
+
+        <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600">{{ assessment.summary }}</p>
+
+    </div>
+    {% endif %}
+
+    <!-- Indicators -->
+    <div class="space-y-4">
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Force Indicators
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Individual factors used to calculate each force score.
+                </p>
+            </div>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <a href="{{ url_for('five_forces.create_indicator', assessment_id=assessment.id) }}"
+               class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+                + Add Indicator
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% set force_names = [
+            'Buyer Power',
+            'Supplier Power',
+            'Competitive Rivalry',
+            'Threat of Substitution',
+            'Threat of New Entrants'
+        ] %}
+
+        {% for force_name in force_names %}
+
+        {% set force_indicators = assessment.indicators | selectattr('force_name', 'equalto', force_name) | list %}
+
+        <div class="content-card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+            <div class="flex flex-col gap-2 border-b border-gray-200 bg-gray-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+                <h4 class="font-semibold text-gray-900">
+                    {{ force_name }}
+                </h4>
+
+                <span class="text-xs text-gray-500">
+                    {{ force_indicators | length }} indicator(s)
+                </span>
+
+            </div>
+
+            {% if force_indicators %}
+
+            <div class="divide-y divide-gray-100">
+
+                {% for indicator in force_indicators %}
+                <div class="p-5">
+
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                        <div class="min-w-0 flex-1">
+
+                            <h5 class="font-medium text-gray-900">
+                                {{ indicator.indicator_name }}
+                            </h5>
+
+                            {% if indicator.explanation %}
+                            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">
+                                {{ indicator.explanation }}
+                            </p>
+                            {% endif %}
+
+                            {% if indicator.evidence_title %}
+                            <p class="mt-2 text-xs text-blue-700">
+                                Evidence: {{ indicator.evidence_title }}
+                            </p>
+                            {% elif indicator.evidence_id %}
+                            <p class="mt-2 text-xs text-gray-500">
+                                Evidence ID: {{ indicator.evidence_id }}
+                            </p>
+                            {% endif %}
+
+                        </div>
+
+                        <div class="flex shrink-0 items-center gap-4">
+
+                            <div class="text-right">
+                                <p class="text-xl font-semibold text-gray-900">
+                                    {{ indicator.score }}/5
+                                </p>
+
+                                <p class="text-xs text-gray-500">
+                                    Weight: {{ indicator.weight }}
+                                </p>
+                            </div>
+
+                            {% if current_user.has_role('Administrator', 'Analyst') %}
+                            <div class="flex flex-col gap-2">
+
+                                <a href="{{ url_for('five_forces.edit_indicator', indicator_id=indicator.id) }}"
+                                   class="text-xs font-medium text-blue-600 hover:text-blue-800">
+                                    Edit
+                                </a>
+
+                                <form method="POST"
+                                      action="{{ url_for('five_forces.delete_indicator', indicator_id=indicator.id) }}"
+                                      onsubmit="return confirm('Delete this indicator? This action cannot be undone.');">
+
+                                    {{ delete_form.hidden_tag() }}
+
+                                    <button type="submit"
+                                            class="text-xs font-medium text-red-600 hover:text-red-800">
+                                        Delete
+                                    </button>
+
+                                </form>
+
+                            </div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+            <div class="px-5 py-8 text-center">
+
+                <p class="text-sm text-gray-500">
+                    No indicators have been added for this force yet.
+                </p>
+
+                {% if current_user.has_role('Administrator', 'Analyst') %}
+                <a href="{{ url_for('five_forces.create_indicator', assessment_id=assessment.id) }}"
+                   class="mt-3 inline-block text-sm font-medium text-blue-600 hover:text-blue-800">
+                    Add the first indicator
+                </a>
+                {% endif %}
+
+            </div>
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- Scoring Guide -->
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <h3 class="text-base font-semibold text-gray-900">
+            Scoring Guide
+        </h3>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-5">
+
+            {% for score, label in [
+                (1, 'Very Low'),
+                (2, 'Low'),
+                (3, 'Moderate'),
+                (4, 'High'),
+                (5, 'Very High')
+            ] %}
+            <div class="rounded-lg border border-gray-200 p-3 text-center">
+
+                <p class="text-xl font-bold text-gray-900">
+                    {{ score }}
+                </p>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    {{ label }}
+                </p>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+        <p class="mt-4 text-xs leading-5 text-gray-500">
+            Each force score is calculated using the weighted average of its
+            indicators. The overall score is calculated as the average of all
+            five force scores once every force has at least one indicator.
+            A higher score represents stronger competitive pressure.
+        </p>
+
+    </div>
+
+</div>
+{% endblock %}

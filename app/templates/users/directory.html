@@ -1,0 +1,458 @@
+
+{% extends "base.html" %}
+
+{% block title %}User Directory | StrategySim{% endblock %}
+
+{% block page_title %}User Management{% endblock %}
+
+{% block page_subtitle %}
+    Manage platform accounts, access roles and account status.
+{% endblock %}
+
+{% block page_actions %}
+    <a
+        href="{{ url_for('users.create_user') }}"
+        class="inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+    >
+        <svg
+            class="mr-2 h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 5v14m-7-7h14"
+            />
+        </svg>
+
+        Create User
+    </a>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- User Statistics -->
+    <section aria-label="User statistics">
+
+        <div class="mb-3">
+            <h2 class="text-sm font-semibold text-slate-800">
+                Account Overview
+            </h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+                Current account distribution across the platform.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            <!-- Total Users -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-slate-500">
+                        Total Users
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m16-10a4 4 0 010-8m4 18v-2a4 4 0 00-3-3.87M9 11a4 4 0 100-8 4 4 0 000 8z"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ total_users }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Registered platform accounts
+                </p>
+
+            </div>
+
+
+            <!-- Active Users -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-slate-500">
+                        Active Users
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M5 12l4 4L19 6"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ active_users }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Accounts currently enabled
+                </p>
+
+            </div>
+
+
+            <!-- Inactive Users -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-slate-500">
+                        Inactive Users
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M12 8v4m0 4h.01M4.93 4.93l14.14 14.14M12 3a9 9 0 100 18 9 9 0 000-18z"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ inactive_users }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Accounts currently disabled
+                </p>
+
+            </div>
+
+
+            <!-- Administrator Accounts -->
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-slate-500">
+                        Administrators
+                    </span>
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                             viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="1.8"
+                                  d="M9 12l2 2 4-4"/>
+                        </svg>
+                    </span>
+                </div>
+
+                <div class="mt-4 text-3xl font-semibold tracking-tight text-slate-900">
+                    {{ role_counts["Administrator"] }}
+                </div>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    Accounts with administrative access
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Role Distribution -->
+    <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+
+        <div class="mb-4">
+            <h2 class="text-sm font-semibold text-slate-800">
+                Role Distribution
+            </h2>
+
+            <p class="mt-1 text-xs text-slate-500">
+                Distribution of accounts by assigned access role.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+            <div class="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <div class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Administrator
+                </div>
+
+                <div class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ role_counts["Administrator"] }}
+                </div>
+            </div>
+
+            <div class="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <div class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Analyst
+                </div>
+
+                <div class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ role_counts["Analyst"] }}
+                </div>
+            </div>
+
+            <div class="rounded-lg border border-slate-100 bg-slate-50 p-4">
+                <div class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Viewer
+                </div>
+
+                <div class="mt-2 text-2xl font-semibold text-slate-900">
+                    {{ role_counts["Viewer"] }}
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- User Directory Table -->
+    <section class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+
+        <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h2 class="text-sm font-semibold text-slate-800">
+                    Registered Users
+                </h2>
+
+                <p class="mt-1 text-xs text-slate-500">
+                    View and manage registered platform accounts.
+                </p>
+            </div>
+
+            <div class="text-xs text-slate-500">
+                {{ total_users }} account{% if total_users != 1 %}s{% endif %}
+            </div>
+
+        </div>
+
+
+        <!-- Responsive table -->
+        <div class="overflow-x-auto">
+
+            <table class="min-w-full divide-y divide-slate-200">
+
+                <thead class="bg-slate-50">
+
+                    <tr>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            User
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Role
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Account Status
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Last Login
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Created
+                        </th>
+
+                        <th scope="col"
+                            class="whitespace-nowrap px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+
+                    {% for user in users %}
+
+                        <tr class="transition hover:bg-slate-50">
+
+                            <!-- User information -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                <div class="font-medium text-slate-900">
+                                    {{ user.full_name }}
+                                </div>
+
+                                <div class="mt-1 text-xs text-slate-500">
+                                    {{ user.email }}
+                                </div>
+
+                                <div class="mt-1 text-xs text-slate-400">
+                                    ID: {{ user.id }}
+                                </div>
+
+                            </td>
+
+
+                            <!-- Role -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                {% if user.role == "Administrator" %}
+
+                                    <span class="inline-flex rounded-md bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">
+                                        Administrator
+                                    </span>
+
+                                {% elif user.role == "Analyst" %}
+
+                                    <span class="inline-flex rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                        Analyst
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="inline-flex rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                                        Viewer
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Account status -->
+                            <td class="whitespace-nowrap px-5 py-4">
+
+                                {% if user.is_active %}
+
+                                    <span class="inline-flex items-center gap-2 text-xs font-medium text-emerald-700">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                        Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="inline-flex items-center gap-2 text-xs font-medium text-red-700">
+                                        <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                                        Inactive
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Last login -->
+                            <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-600">
+
+                                {% if user.last_login_at %}
+                                    {{ user.last_login_at }}
+                                {% else %}
+                                    <span class="text-slate-400">
+                                        Never logged in
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+
+                            <!-- Creation date -->
+                            <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-600">
+
+                                {{ user.created_at or "Not available" }}
+
+                            </td>
+
+
+                            <!-- Actions -->
+                            <td class="whitespace-nowrap px-5 py-4 text-right">
+
+                                <a
+                                    href="{{ url_for('users.edit_user', user_id=user.id) }}"
+                                    class="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+                                >
+                                    Edit Account
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% else %}
+
+                        <tr>
+                            <td colspan="6" class="px-5 py-12 text-center">
+
+                                <div class="text-sm font-medium text-slate-700">
+                                    No user accounts found.
+                                </div>
+
+                                <p class="mt-1 text-xs text-slate-500">
+                                    Create a user account to get started.
+                                </p>
+
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Table footer -->
+        <div class="border-t border-slate-200 bg-slate-50 px-5 py-3">
+
+            <p class="text-xs text-slate-500">
+                Account information is retrieved directly from the StrategySim database.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- Administrative Information -->
+    <section class="rounded-xl border border-slate-200 bg-white p-5">
+
+        <h2 class="text-sm font-semibold text-slate-800">
+            Administrative Information
+        </h2>
+
+        <p class="mt-2 text-sm leading-6 text-slate-500">
+            Only Administrators can access this section and manage user
+            accounts. Account roles determine access to the different
+            StrategySim modules. Changes to user accounts are recorded
+            in the platform audit log.
+        </p>
+
+    </section>
+
+</div>
+
+{% endblock %}

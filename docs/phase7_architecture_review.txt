@@ -1,0 +1,1872 @@
+=====================================================================================
+STRATEGYSIM - PHASE 7 ARCHITECTURE REVIEW
+=====================================================================================
+
+
+=====================================================================================
+FILE: app/database/schema.sql
+=====================================================================================
+
+
+-- =========================================================
+-- STRATEGYSIM DATABASE SCHEMA
+-- Database: SQLite
+-- Version: 1.0
+-- =========================================================
+
+PRAGMA foreign_keys = ON;
+
+
+-- =========================================================
+-- 1. USER MANAGEMENT
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS users (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    full_name TEXT NOT NULL,
+
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+
+    password_hash TEXT NOT NULL,
+
+    role TEXT NOT NULL DEFAULT 'Viewer'
+        CHECK (role IN ('Administrator', 'Analyst', 'Viewer')),
+
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+
+    last_login_at TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
+
+
+-- =========================================================
+-- 2. INDUSTRY MANAGEMENT
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS industries (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL,
+
+    sector TEXT,
+
+    description TEXT,
+
+    geography TEXT DEFAULT 'India',
+
+    industry_type TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(name, geography)
+
+);
+
+
+-- =========================================================
+-- 3. COMPANY MANAGEMENT
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS companies (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    industry_id INTEGER NOT NULL,
+
+    name TEXT NOT NULL,
+
+    company_type TEXT NOT NULL DEFAULT 'Target'
+        CHECK (company_type IN ('Target', 'Competitor', 'Other')),
+
+    description TEXT,
+
+    headquarters TEXT,
+
+    website TEXT,
+
+    annual_revenue REAL,
+
+    employee_count INTEGER,
+
+    market_share REAL,
+
+    founded_year INTEGER,
+
+    is_demo INTEGER NOT NULL DEFAULT 0
+        CHECK (is_demo IN (0, 1)),
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (industry_id)
+        REFERENCES industries(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 4. COMPETITOR RELATIONSHIPS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS competitor_relationships (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    competitor_id INTEGER NOT NULL,
+
+    competitive_strength INTEGER
+        CHECK (
+            competitive_strength IS NULL
+            OR competitive_strength BETWEEN 1 AND 5
+        ),
+
+    notes TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (competitor_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    CHECK (company_id != competitor_id),
+
+    UNIQUE(company_id, competitor_id)
+
+);
+
+
+-- =========================================================
+-- 5. PORTER'S FIVE FORCES ASSESSMENTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS five_forces_assessments (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    assessment_name TEXT NOT NULL,
+
+    assessment_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    buyer_power_score REAL,
+
+    supplier_power_score REAL,
+
+    competitive_rivalry_score REAL,
+
+    threat_of_substitution_score REAL,
+
+    threat_of_new_entrants_score REAL,
+
+    overall_score REAL,
+
+    summary TEXT,
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 6. FIVE FORCES INDICATORS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS five_forces_indicators (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    assessment_id INTEGER NOT NULL,
+
+    force_name TEXT NOT NULL
+        CHECK (
+            force_name IN (
+                'Buyer Power',
+                'Supplier Power',
+                'Competitive Rivalry',
+                'Threat of Substitution',
+                'Threat of New Entrants'
+            )
+        ),
+
+    indicator_name TEXT NOT NULL,
+
+    score INTEGER NOT NULL
+        CHECK (score BETWEEN 1 AND 5),
+
+    weight REAL NOT NULL DEFAULT 1
+        CHECK (weight > 0),
+
+    explanation TEXT,
+
+    evidence_id INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (assessment_id)
+        REFERENCES five_forces_assessments(id)
+        ON DELETE CASCADE
+
+);
+
+
+-- =========================================================
+-- 7. VALUE CHAIN ASSESSMENTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS value_chain_assessments (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    assessment_name TEXT NOT NULL,
+
+    assessment_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    summary TEXT,
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 8. VALUE CHAIN ACTIVITIES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS value_chain_activities (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    assessment_id INTEGER NOT NULL,
+
+    activity_category TEXT NOT NULL
+        CHECK (
+            activity_category IN ('Primary', 'Support')
+        ),
+
+    activity_name TEXT NOT NULL,
+
+    description TEXT,
+
+    cost_contribution REAL,
+
+    strategic_importance INTEGER
+        CHECK (
+            strategic_importance IS NULL
+            OR strategic_importance BETWEEN 1 AND 5
+        ),
+
+    competitive_advantage TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (assessment_id)
+        REFERENCES value_chain_assessments(id)
+        ON DELETE CASCADE
+
+);
+
+
+-- =========================================================
+-- 9. SUPPLIER MANAGEMENT
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS suppliers (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL,
+
+    supplier_code TEXT UNIQUE,
+
+    parent_supplier_id INTEGER,
+
+    country TEXT,
+
+    headquarters TEXT,
+
+    supplier_type TEXT,
+
+    tier_level INTEGER NOT NULL DEFAULT 1
+        CHECK (tier_level >= 1),
+
+    risk_level TEXT DEFAULT 'Medium'
+        CHECK (risk_level IN ('Low', 'Medium', 'High', 'Critical')),
+
+    financial_dependency_score REAL,
+
+    operational_risk_score REAL,
+
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (parent_supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 10. COMPONENT MANAGEMENT
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS components (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL,
+
+    component_code TEXT UNIQUE,
+
+    category TEXT,
+
+    description TEXT,
+
+    criticality TEXT DEFAULT 'Medium'
+        CHECK (criticality IN ('Low', 'Medium', 'High', 'Critical')),
+
+    is_active INTEGER NOT NULL DEFAULT 1
+        CHECK (is_active IN (0, 1)),
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+
+);
+
+
+-- =========================================================
+-- 11. SUPPLIER COMPONENT RELATIONSHIPS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS supplier_components (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    supplier_id INTEGER NOT NULL,
+
+    component_id INTEGER NOT NULL,
+
+    unit_cost REAL,
+
+    lead_time_days INTEGER,
+
+    dependency_share_percent REAL
+        CHECK (
+            dependency_share_percent IS NULL
+            OR dependency_share_percent BETWEEN 0 AND 100
+        ),
+
+    is_alternative INTEGER NOT NULL DEFAULT 0
+        CHECK (is_alternative IN (0, 1)),
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (component_id)
+        REFERENCES components(id)
+        ON DELETE CASCADE,
+
+    UNIQUE(supplier_id, component_id)
+
+);
+
+
+-- =========================================================
+-- 12. PROCUREMENT RECORDS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS procurement_records (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    supplier_id INTEGER NOT NULL,
+
+    component_id INTEGER NOT NULL,
+
+    annual_spend REAL NOT NULL DEFAULT 0
+        CHECK (annual_spend >= 0),
+
+    spend_share_percent REAL
+        CHECK (
+            spend_share_percent IS NULL
+            OR spend_share_percent BETWEEN 0 AND 100
+        ),
+
+    quantity REAL,
+
+    unit_cost REAL,
+
+    contract_start_date TEXT,
+
+    contract_end_date TEXT,
+
+    contract_status TEXT DEFAULT 'Active'
+        CHECK (
+            contract_status IN (
+                'Active',
+                'Expired',
+                'Pending',
+                'Terminated'
+            )
+        ),
+
+    recorded_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE RESTRICT,
+
+    FOREIGN KEY (component_id)
+        REFERENCES components(id)
+        ON DELETE RESTRICT
+
+);
+
+
+-- =========================================================
+-- 13. SUPPLIER FACILITIES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS facilities (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    supplier_id INTEGER NOT NULL,
+
+    facility_name TEXT NOT NULL,
+
+    facility_type TEXT,
+
+    country TEXT,
+
+    city TEXT,
+
+    capacity_description TEXT,
+
+    operational_status TEXT DEFAULT 'Active'
+        CHECK (
+            operational_status IN (
+                'Active',
+                'Inactive',
+                'Disrupted'
+            )
+        ),
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE
+
+);
+
+
+-- =========================================================
+-- 14. SUPPLIER DEPENDENCY GRAPH RELATIONSHIPS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS supplier_relationships (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    source_supplier_id INTEGER NOT NULL,
+
+    target_supplier_id INTEGER NOT NULL,
+
+    relationship_type TEXT NOT NULL,
+
+    dependency_strength REAL
+        CHECK (
+            dependency_strength IS NULL
+            OR dependency_strength BETWEEN 0 AND 100
+        ),
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (source_supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (target_supplier_id)
+        REFERENCES suppliers(id)
+        ON DELETE CASCADE,
+
+    CHECK (source_supplier_id != target_supplier_id),
+
+    UNIQUE(
+        source_supplier_id,
+        target_supplier_id,
+        relationship_type
+    )
+
+);
+
+
+-- =========================================================
+-- 15. WHAT-IF SCENARIOS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS scenarios (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    scenario_name TEXT NOT NULL,
+
+    scenario_type TEXT NOT NULL,
+
+    description TEXT,
+
+    parameters_json TEXT NOT NULL DEFAULT '{}',
+
+    baseline_metrics_json TEXT,
+
+    status TEXT NOT NULL DEFAULT 'Draft'
+        CHECK (
+            status IN (
+                'Draft',
+                'Simulated',
+                'Archived'
+            )
+        ),
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 16. SCENARIO RESULTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS scenario_results (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    scenario_id INTEGER NOT NULL,
+
+    result_name TEXT NOT NULL,
+
+    baseline_value REAL,
+
+    simulated_value REAL,
+
+    change_value REAL,
+
+    change_percent REAL,
+
+    interpretation TEXT,
+
+    result_data_json TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (scenario_id)
+        REFERENCES scenarios(id)
+        ON DELETE CASCADE
+
+);
+
+
+-- =========================================================
+-- 17. DECISION MATRICES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS decision_matrices (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id INTEGER NOT NULL,
+
+    matrix_name TEXT NOT NULL,
+
+    objective TEXT,
+
+    description TEXT,
+
+    created_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (company_id)
+        REFERENCES companies(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (created_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 18. DECISION CRITERIA
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS decision_criteria (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    matrix_id INTEGER NOT NULL,
+
+    criterion_name TEXT NOT NULL,
+
+    weight REAL NOT NULL
+        CHECK (weight >= 0),
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (matrix_id)
+        REFERENCES decision_matrices(id)
+        ON DELETE CASCADE
+
+);
+
+
+-- =========================================================
+-- 19. DECISION OPTIONS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS decision_options (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    matrix_id INTEGER NOT NULL,
+
+    option_name TEXT NOT NULL,
+
+    description TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (matrix_id)
+        REFERENCES decision_matrices(id)
+        ON DELETE CASCADE
+
+);
+
+
+-- =========================================================
+-- 20. DECISION SCORES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS decision_scores (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    option_id INTEGER NOT NULL,
+
+    criterion_id INTEGER NOT NULL,
+
+    score REAL NOT NULL
+        CHECK (score BETWEEN 1 AND 5),
+
+    weighted_score REAL,
+
+    justification TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (option_id)
+        REFERENCES decision_options(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (criterion_id)
+        REFERENCES decision_criteria(id)
+        ON DELETE CASCADE,
+
+    UNIQUE(option_id, criterion_id)
+
+);
+
+
+-- =========================================================
+-- 21. EVIDENCE AND DATA PROVENANCE
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS evidence (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    title TEXT NOT NULL,
+
+    description TEXT,
+
+    source_type TEXT NOT NULL DEFAULT 'Manual'
+        CHECK (
+            source_type IN (
+                'Manual',
+                'CSV Import',
+                'External Source',
+                'Internal Research',
+                'Document'
+            )
+        ),
+
+    source_name TEXT,
+
+    source_url TEXT,
+
+    file_path TEXT,
+
+    entity_type TEXT,
+
+    entity_id INTEGER,
+
+    reliability_score INTEGER
+        CHECK (
+            reliability_score IS NULL
+            OR reliability_score BETWEEN 1 AND 5
+        ),
+
+    uploaded_by INTEGER,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (uploaded_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 22. AUDIT LOGS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user_id INTEGER,
+
+    action TEXT NOT NULL,
+
+    entity_type TEXT,
+
+    entity_id INTEGER,
+
+    description TEXT,
+
+    ip_address TEXT,
+
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE SET NULL
+
+);
+
+
+-- =========================================================
+-- 23. DATABASE INDEXES
+-- =========================================================
+
+CREATE INDEX IF NOT EXISTS idx_companies_industry
+ON companies(industry_id);
+
+CREATE INDEX IF NOT EXISTS idx_companies_type
+ON companies(company_type);
+
+CREATE INDEX IF NOT EXISTS idx_competitors_company
+ON competitor_relationships(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_five_forces_company
+ON five_forces_assessments(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_five_forces_indicators_assessment
+ON five_forces_indicators(assessment_id);
+
+CREATE INDEX IF NOT EXISTS idx_value_chain_company
+ON value_chain_assessments(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_value_chain_activities_assessment
+ON value_chain_activities(assessment_id);
+
+CREATE INDEX IF NOT EXISTS idx_suppliers_parent
+ON suppliers(parent_supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_supplier_components_supplier
+ON supplier_components(supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_supplier_components_component
+ON supplier_components(component_id);
+
+CREATE INDEX IF NOT EXISTS idx_procurement_company
+ON procurement_records(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_procurement_supplier
+ON procurement_records(supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_procurement_component
+ON procurement_records(component_id);
+
+CREATE INDEX IF NOT EXISTS idx_supplier_relationship_source
+ON supplier_relationships(source_supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_supplier_relationship_target
+ON supplier_relationships(target_supplier_id);
+
+CREATE INDEX IF NOT EXISTS idx_scenarios_company
+ON scenarios(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_scenario_results_scenario
+ON scenario_results(scenario_id);
+
+CREATE INDEX IF NOT EXISTS idx_decision_matrices_company
+ON decision_matrices(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_decision_criteria_matrix
+ON decision_criteria(matrix_id);
+
+CREATE INDEX IF NOT EXISTS idx_decision_options_matrix
+ON decision_options(matrix_id);
+
+CREATE INDEX IF NOT EXISTS idx_decision_scores_option
+ON decision_scores(option_id);
+
+CREATE INDEX IF NOT EXISTS idx_evidence_entity
+ON evidence(entity_type, entity_id);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_user
+ON audit_logs(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_audit_logs_created
+ON audit_logs(created_at);
+
+
+-- =========================================================
+-- END OF STRATEGYSIM DATABASE SCHEMA
+-- =========================================================
+
+
+
+=====================================================================================
+FILE: app/database/connection.py
+=====================================================================================
+
+
+import sqlite3
+
+from pathlib import Path
+from flask import current_app, g
+
+
+# ---------------------------------------------------------
+# DATABASE PATH RESOLUTION
+# ---------------------------------------------------------
+
+def get_database_path():
+    """
+    Returns the absolute path of the SQLite database.
+
+    Relative paths are resolved from the project root.
+    """
+
+    database_path = Path(
+        current_app.config["DATABASE_PATH"]
+    )
+
+    if not database_path.is_absolute():
+        project_root = Path(__file__).resolve().parents[2]
+        database_path = project_root / database_path
+
+    return database_path.resolve()
+
+
+# ---------------------------------------------------------
+# DATABASE CONNECTION
+# ---------------------------------------------------------
+
+def get_db():
+    """
+    Returns the current request's SQLite connection.
+
+    A single connection is reused during the current
+    Flask application context.
+    """
+
+    if "db" not in g:
+
+        database_path = get_database_path()
+
+        database_path.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        connection = sqlite3.connect(
+            database_path,
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+
+        # Return database rows as dictionary-like objects.
+        connection.row_factory = sqlite3.Row
+
+        # Enforce foreign key constraints.
+        connection.execute("PRAGMA foreign_keys = ON")
+
+        # Configure SQLite busy timeout.
+        connection.execute("PRAGMA busy_timeout = 5000")
+
+        g.db = connection
+
+    return g.db
+
+
+# ---------------------------------------------------------
+# CLOSE DATABASE CONNECTION
+# ---------------------------------------------------------
+
+def close_db(error=None):
+    """
+    Closes the database connection at the end of
+    the Flask application context.
+    """
+
+    database = g.pop("db", None)
+
+    if database is not None:
+        database.close()
+
+
+# ---------------------------------------------------------
+# DATABASE INITIALIZATION HOOK
+# ---------------------------------------------------------
+
+def init_app(app):
+    """
+    Registers database cleanup with the Flask application.
+    """
+
+    app.teardown_appcontext(close_db)
+
+
+# ---------------------------------------------------------
+# DATABASE TRANSACTION HELPER
+# ---------------------------------------------------------
+
+def execute_transaction(callback):
+    """
+    Executes a group of database operations inside
+    a transaction.
+
+    Parameters:
+        callback: Function receiving the database connection.
+
+    Returns:
+        Result returned by the callback.
+
+    Rolls back changes if an exception occurs.
+    """
+
+    database = get_db()
+
+    try:
+        with database:
+            result = callback(database)
+
+        return result
+
+    except Exception:
+        raise
+
+
+
+=====================================================================================
+FILE: app/database/initialize.py
+=====================================================================================
+
+
+import sqlite3
+
+from pathlib import Path
+
+from app.database.connection import get_db, get_database_path
+
+
+# ---------------------------------------------------------
+# SCHEMA FILE LOCATION
+# ---------------------------------------------------------
+
+SCHEMA_PATH = (
+    Path(__file__).resolve().parent / "schema.sql"
+)
+
+
+# ---------------------------------------------------------
+# INITIALIZE DATABASE
+# ---------------------------------------------------------
+
+def initialize_database(app):
+    """
+    Initializes the StrategySim SQLite database.
+
+    This function:
+        1. Creates the database directory.
+        2. Reads the SQL schema.
+        3. Creates all required tables and indexes.
+        4. Checks database integrity.
+        5. Checks foreign key consistency.
+
+    Existing data is preserved because the schema uses
+    CREATE TABLE IF NOT EXISTS.
+    """
+
+    print("\nInitializing StrategySim database...")
+
+    # -----------------------------------------------------
+    # CHECK SCHEMA FILE
+    # -----------------------------------------------------
+
+    if not SCHEMA_PATH.exists():
+
+        raise FileNotFoundError(
+            f"Database schema not found: {SCHEMA_PATH}"
+        )
+
+    schema_sql = SCHEMA_PATH.read_text(
+        encoding="utf-8"
+    )
+
+    # -----------------------------------------------------
+    # ACTIVATE FLASK APPLICATION CONTEXT
+    # -----------------------------------------------------
+
+    with app.app_context():
+
+        # Resolve the database location only after the
+        # application context has been activated.
+
+        database_path = get_database_path()
+
+        database_path.parent.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        # -------------------------------------------------
+        # CREATE TABLES AND INDEXES
+        # -------------------------------------------------
+
+        database = get_db()
+
+        try:
+
+            database.executescript(schema_sql)
+
+            database.commit()
+
+        except sqlite3.Error as error:
+
+            database.rollback()
+
+            raise RuntimeError(
+                f"Database schema initialization failed: {error}"
+            ) from error
+
+        # -------------------------------------------------
+        # DATABASE INTEGRITY CHECK
+        # -------------------------------------------------
+
+        integrity_result = database.execute(
+            "PRAGMA integrity_check"
+        ).fetchone()
+
+        if integrity_result[0] != "ok":
+
+            raise RuntimeError(
+                "SQLite database integrity check failed: "
+                f"{integrity_result[0]}"
+            )
+
+        # -------------------------------------------------
+        # FOREIGN KEY CHECK
+        # -------------------------------------------------
+
+        foreign_key_errors = database.execute(
+            "PRAGMA foreign_key_check"
+        ).fetchall()
+
+        if foreign_key_errors:
+
+            raise RuntimeError(
+                "Database foreign key validation failed: "
+                f"{len(foreign_key_errors)} issue(s) found."
+            )
+
+        # -------------------------------------------------
+        # COUNT CREATED TABLES
+        # -------------------------------------------------
+
+        tables = database.execute(
+            """
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table'
+              AND name NOT LIKE 'sqlite_%'
+            ORDER BY name
+            """
+        ).fetchall()
+
+        table_count = len(tables)
+
+    # -----------------------------------------------------
+    # INITIALIZATION SUCCESS
+    # -----------------------------------------------------
+
+    print("-" * 55)
+
+    print(
+        "StrategySim database initialized successfully."
+    )
+
+    print(
+        f"Database location: {database_path}"
+    )
+
+    print(
+        f"Tables created/verified: {table_count}"
+    )
+
+    print(
+        "Integrity check: PASSED"
+    )
+
+    print(
+        "Foreign key check: PASSED"
+    )
+
+    print("-" * 55)
+
+    return database_path
+
+
+
+=====================================================================================
+FILE: app/companies/routes.py
+=====================================================================================
+
+
+
+
+=====================================================================================
+FILE: app/companies/__init__.py
+=====================================================================================
+
+
+
+
+=====================================================================================
+FILE: app/__init__.py
+=====================================================================================
+
+
+import os
+
+from flask import (
+    Flask,
+    jsonify,
+    redirect,
+    url_for
+)
+
+from flask_login import (
+    LoginManager,
+    current_user
+)
+
+from flask_wtf.csrf import CSRFProtect
+
+from app.config import configurations
+
+from app.database import (
+    init_app as init_database_app,
+    initialize_database
+)
+
+
+# ---------------------------------------------------------
+# FLASK EXTENSIONS
+# ---------------------------------------------------------
+
+login_manager = LoginManager()
+csrf = CSRFProtect()
+
+
+# ---------------------------------------------------------
+# APPLICATION FACTORY
+# ---------------------------------------------------------
+
+def create_app(config_name=None):
+    """
+    Creates and configures the StrategySim Flask application.
+    """
+
+    app = Flask(
+        __name__,
+        instance_relative_config=True
+    )
+
+    # -----------------------------------------------------
+    # LOAD CONFIGURATION
+    # -----------------------------------------------------
+
+    if config_name is None:
+        config_name = os.getenv(
+            "FLASK_ENV",
+            "development"
+        )
+
+    config_class = configurations.get(
+        config_name,
+        configurations["development"]
+    )
+
+    app.config.from_object(config_class)
+
+    # -----------------------------------------------------
+    # VALIDATE SECRET KEY
+    # -----------------------------------------------------
+
+    if not app.config.get("SECRET_KEY"):
+        raise RuntimeError(
+            "SECRET_KEY is missing. "
+            "Generate a secure secret key and configure it "
+            "in the .env file."
+        )
+
+    # -----------------------------------------------------
+    # CREATE INSTANCE DIRECTORY
+    # -----------------------------------------------------
+
+    os.makedirs(
+        app.instance_path,
+        exist_ok=True
+    )
+
+    # -----------------------------------------------------
+    # INITIALIZE FLASK EXTENSIONS
+    # -----------------------------------------------------
+
+    login_manager.init_app(app)
+
+    login_manager.login_view = "auth.login"
+
+    login_manager.login_message = (
+        "Please sign in to access this page."
+    )
+
+    login_manager.login_message_category = "warning"
+
+    login_manager.session_protection = "strong"
+
+    csrf.init_app(app)
+
+    # -----------------------------------------------------
+    # INITIALIZE DATABASE
+    # -----------------------------------------------------
+
+    init_database_app(app)
+
+    initialize_database(app)
+
+    # -----------------------------------------------------
+    # REGISTER BLUEPRINTS
+    # -----------------------------------------------------
+
+    from app.auth import auth_bp
+    from app.dashboard import dashboard_bp
+    from app.users import users_bp
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(dashboard_bp)
+    app.register_blueprint(users_bp)
+
+    # -----------------------------------------------------
+    # ROOT URL
+    # -----------------------------------------------------
+
+    @app.route(
+        "/",
+        methods=["GET"]
+    )
+    def index():
+        """
+        Handles the main application URL.
+
+        Authenticated users are redirected to the
+        graphical dashboard.
+
+        Unauthenticated users are redirected to
+        the login page.
+        """
+
+        if current_user.is_authenticated:
+
+            return redirect(
+                url_for("dashboard.dashboard_home")
+            )
+
+        return redirect(
+            url_for("auth.login")
+        )
+
+    # -----------------------------------------------------
+    # HEALTH CHECK
+    # -----------------------------------------------------
+
+    @app.route(
+        "/health",
+        methods=["GET"]
+    )
+    def health_check():
+
+        return jsonify({
+            "status": "success",
+            "application": app.config["APP_NAME"],
+            "version": app.config["APP_VERSION"],
+            "database": "connected",
+            "message": (
+                "StrategySim backend and database "
+                "are running."
+            )
+        }), 200
+
+    # -----------------------------------------------------
+    # ERROR HANDLERS
+    # -----------------------------------------------------
+
+    @app.errorhandler(403)
+    def forbidden(error):
+
+        return jsonify({
+            "status": "error",
+            "code": 403,
+            "message": (
+                "You do not have permission "
+                "to access this resource."
+            )
+        }), 403
+
+    @app.errorhandler(404)
+    def page_not_found(error):
+
+        return jsonify({
+            "status": "error",
+            "code": 404,
+            "message": (
+                "The requested resource was not found."
+            )
+        }), 404
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+
+        return jsonify({
+            "status": "error",
+            "code": 500,
+            "message": (
+                "An internal server error occurred."
+            )
+        }), 500
+
+    # -----------------------------------------------------
+    # APPLICATION STARTUP MESSAGE
+    # -----------------------------------------------------
+
+    print("\n" + "=" * 55)
+
+    print("StrategySim Application Initialized")
+
+    print(
+        f"Version: {app.config['APP_VERSION']}"
+    )
+
+    print(
+        f"Environment: {config_name}"
+    )
+
+    print("Database: Initialized")
+
+    print("Authentication: Initialized")
+
+    print("User Management: Registered")
+
+    print("=" * 55 + "\n")
+
+    return app
+
+
+# ---------------------------------------------------------
+# FLASK-LOGIN USER LOADER
+# ---------------------------------------------------------
+
+@login_manager.user_loader
+def load_user(user_id):
+    """
+    Retrieves an active authenticated user from SQLite.
+
+    Inactive accounts are not restored into authenticated
+    sessions.
+    """
+
+    from app.users.models import User
+
+    user = User.get_by_id(user_id)
+
+    if user is None or not user.is_active:
+        return None
+
+    return user
+
+
+
+=====================================================================================
+FILE: app/templates/partials/sidebar.html
+=====================================================================================
+
+
+<aside id="appSidebar" class="app-sidebar">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <a href="{{ url_for('dashboard.dashboard_home') }}" class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-6 w-6"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path d="M4 19V5"/>
+                    <path d="M4 19h16"/>
+                    <path d="m7 15 4-4 3 3 5-7"/>
+                    <path d="M16 7h3v3"/>
+                </svg>
+            </div>
+
+            <div>
+                <div class="text-lg font-bold tracking-tight text-slate-900">
+                    StrategySim
+                </div>
+                <div class="text-xs text-slate-500">
+                    Strategic Intelligence
+                </div>
+            </div>
+        </a>
+
+        <!-- Mobile Close Button -->
+        <button type="button"
+                id="sidebarClose"
+                class="sidebar-mobile-close"
+                aria-label="Close navigation">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-5 w-5"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2">
+                <path d="m18 6-12 12M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-navigation">
+
+        <!-- Overview -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Overview</div>
+
+            <a href="{{ url_for('dashboard.dashboard_home') }}"
+               class="sidebar-link {% if request.endpoint == 'dashboard.dashboard_home' %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <rect x="3" y="3" width="8" height="8" rx="1"/>
+                        <rect x="13" y="3" width="8" height="5" rx="1"/>
+                        <rect x="13" y="10" width="8" height="11" rx="1"/>
+                        <rect x="3" y="13" width="8" height="8" rx="1"/>
+                    </svg>
+                </span>
+
+                <span>Dashboard</span>
+
+                {% if request.endpoint == 'dashboard.dashboard_home' %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+        </div>
+
+        <!-- Intelligence -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Intelligence</div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m20 20-4-4"/>
+                        <path d="M8 11h6M11 8v6"/>
+                    </svg>
+                </span>
+                <span>Company Intelligence</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M3 3v18h18"/>
+                        <path d="m7 14 4-4 4 3 5-7"/>
+                    </svg>
+                </span>
+                <span>Competitor Analysis</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+        </div>
+
+        <!-- Strategic Analysis -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Strategic Analysis</div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 3v18M3 12h18"/>
+                        <path d="m12 12 6-6"/>
+                    </svg>
+                </span>
+                <span>Porter's Five Forces</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </span>
+                <span>Value Chain Analysis</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+        </div>
+
+        <!-- Supply Chain Intelligence -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Supply Chain Intelligence</div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <circle cx="5" cy="6" r="2"/>
+                        <circle cx="19" cy="6" r="2"/>
+                        <circle cx="12" cy="18" r="2"/>
+                        <path d="m7 7 4 9M17 7l-4 9M7 6h10"/>
+                    </svg>
+                </span>
+                <span>Supplier Network</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M4 19V5"/>
+                        <path d="M4 19h16"/>
+                        <path d="m7 15 4-4 3 3 5-7"/>
+                    </svg>
+                </span>
+                <span>Dependency Analysis</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+        </div>
+
+        <!-- Decision Support -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Decision Support</div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M12 3v18"/>
+                        <path d="M5 7h14"/>
+                        <path d="m7 7-4 7h8L7 7Z"/>
+                        <path d="m17 7-4 7h8l-4-7Z"/>
+                    </svg>
+                </span>
+                <span>Scenario Simulator</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M12 3v18"/>
+                        <path d="M3 12h18"/>
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="m8 12 2.5 2.5L16 9"/>
+                    </svg>
+                </span>
+                <span>Strategic Decisions</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+        </div>
+
+        <!-- Resources -->
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Resources</div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8M8 12h8M8 16h5"/>
+                    </svg>
+                </span>
+                <span>Reports</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+
+            <div class="sidebar-link sidebar-link-disabled">
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M4 4h16v16H4z"/>
+                        <path d="M8 8h8M8 12h8M8 16h4"/>
+                    </svg>
+                </span>
+                <span>Data & Evidence</span>
+                <span class="sidebar-item-symbol">Soon</span>
+            </div>
+        </div>
+
+        <!-- Administration: Administrators only -->
+        {% if current_user.is_administrator %}
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Administration</div>
+
+            <!-- User Management -->
+            <a href="{{ url_for('users.user_directory_page') }}"
+               class="sidebar-link {% if request.endpoint in ['users.user_directory_page', 'users.create_user', 'users.edit_user'] %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="10" cy="7" r="4"/>
+                        <path d="M20 8v6M17 11h6"/>
+                    </svg>
+                </span>
+
+                <span>User Management</span>
+
+                {% if request.endpoint in ['users.user_directory_page', 'users.create_user', 'users.edit_user'] %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+
+            <!-- Create User -->
+            <a href="{{ url_for('users.create_user') }}"
+               class="sidebar-link {% if request.endpoint == 'users.create_user' %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <circle cx="9" cy="8" r="4"/>
+                        <path d="M3 21v-2a6 6 0 0 1 12 0v2"/>
+                        <path d="M19 8v6M16 11h6"/>
+                    </svg>
+                </span>
+
+                <span>Create User</span>
+
+                {% if request.endpoint == 'users.create_user' %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+
+            <!-- Audit Logs -->
+            <a href="{{ url_for('users.audit_page') }}"
+               class="sidebar-link {% if request.endpoint == 'users.audit_page' %}sidebar-link-active{% endif %}">
+
+                <span class="sidebar-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M8 3h8l4 4v14H4V3h4Z"/>
+                        <path d="M8 11h8M8 15h8M8 7h3"/>
+                    </svg>
+                </span>
+
+                <span>Audit Logs</span>
+
+                {% if request.endpoint == 'users.audit_page' %}
+                    <span class="sidebar-current-indicator"></span>
+                {% endif %}
+            </a>
+        </div>
+        {% endif %}
+
+    </nav>
+
+    <!-- Sidebar Footer / Current User -->
+    <div class="sidebar-bottom">
+        <div class="sidebar-user-panel">
+            <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-700">
+                    {{ current_user.full_name[:1]|upper }}
+                </div>
+
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-semibold text-slate-800">
+                        {{ current_user.full_name }}
+                    </p>
+                    <p class="truncate text-xs text-slate-500">
+                        {{ current_user.role }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</aside>

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if request.endpoint == 'five_forces.edit_indicator' %}
+        Edit Indicator | StrategySim
+    {% else %}
+        Add Indicator | StrategySim
+    {% endif %}
+{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+
+{% block page_title %}
+    {% if request.endpoint == 'five_forces.edit_indicator' %}
+        Edit Force Indicator
+    {% else %}
+        Add Force Indicator
+    {% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+    Record a factor influencing the competitive pressure of an industry.
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="mb-6 border-b border-gray-200 pb-4">
+            <h2 class="text-lg font-semibold text-gray-900">
+                Indicator Details
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-500">
+                Enter the factor, evaluate its competitive pressure, and
+                provide supporting context.
+            </p>
+
+            {% if assessment is defined and assessment %}
+            <p class="mt-2 text-sm font-medium text-blue-700">
+                Assessment: {{ assessment.assessment_name }}
+            </p>
+            {% endif %}
+        </div>
+
+
+        <form method="POST" class="space-y-5" novalidate>
+
+            {{ form.hidden_tag() }}
+
+
+            <!-- Force -->
+            <div>
+                {{ form.force_name.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.force_name(
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                ) }}
+
+                {% for error in form.force_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
+            <!-- Indicator Name -->
+            <div>
+                {{ form.indicator_name.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.indicator_name(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Example: Availability of alternative battery suppliers"
+                ) }}
+
+                {% for error in form.indicator_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
+            <!-- Score and Weight -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                <div>
+                    {{ form.score.label(
+                        class="mb-1 block text-sm font-medium text-gray-700"
+                    ) }}
+
+                    {{ form.score(
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                    ) }}
+
+                    {% for error in form.score.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Select a score from 1 (very low pressure) to 5
+                        (very high pressure).
+                    </p>
+                </div>
+
+
+                <div>
+                    {{ form.weight.label(
+                        class="mb-1 block text-sm font-medium text-gray-700"
+                    ) }}
+
+                    {{ form.weight(
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                        step="0.1",
+                        min="0.1"
+                    ) }}
+
+                    {% for error in form.weight.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+
+                    <p class="mt-1 text-xs text-gray-500">
+                        Higher weights give this indicator greater influence
+                        on its force score.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Explanation -->
+            <div>
+                {{ form.explanation.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.explanation(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    rows="5",
+                    placeholder="Explain why this factor creates competitive pressure. Include relevant market observations or reasoning..."
+                ) }}
+
+                {% for error in form.explanation.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
+            <!-- Evidence Reference -->
+            <div>
+                {{ form.evidence_id.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.evidence_id(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Optional: enter an existing Evidence ID"
+                ) }}
+
+                {% for error in form.evidence_id.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Optional. Enter the ID of an existing record from the
+                    Evidence Management module. Leave blank if no evidence
+                    record is being linked.
+                </p>
+
+                <a href="{{ url_for('evidence.index') }}"
+                   class="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-800">
+                    Open Evidence Management
+                </a>
+            </div>
+
+
+            <!-- Scoring explanation -->
+            <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+
+                <h3 class="text-sm font-semibold text-blue-900">
+                    How indicator scoring works
+                </h3>
+
+                <p class="mt-1 text-sm leading-6 text-blue-800">
+                    A higher score represents stronger competitive pressure.
+                    The force score is calculated using the weighted average
+                    of its indicators:
+                </p>
+
+                <p class="mt-2 text-sm font-medium text-blue-900">
+                    Force Score = Σ (Indicator Score × Weight) ÷ Σ Weight
+                </p>
+
+            </div>
+
+
+            <!-- Actions -->
+            <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
+
+                {% if request.endpoint == 'five_forces.edit_indicator' %}
+
+                    {% if indicator is defined and indicator %}
+                    <a href="{{ url_for('five_forces.detail', assessment_id=indicator.assessment_id) }}"
+                       class="inline-flex justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    {% else %}
+                    <button type="button"
+                            onclick="history.back()"
+                            class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    {% endif %}
+
+                {% else %}
+
+                    <a href="{{ url_for('five_forces.detail', assessment_id=assessment.id) }}"
+                       class="inline-flex justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+
+                {% endif %}
+
+
+                <button type="submit"
+                        class="inline-flex justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+
+                    {% if request.endpoint == 'five_forces.edit_indicator' %}
+                        Save Changes
+                    {% else %}
+                        Add Indicator
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

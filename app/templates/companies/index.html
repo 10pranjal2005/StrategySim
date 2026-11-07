@@ -1,0 +1,485 @@
+
+{% extends "base.html" %}
+
+{% block title %}Company Intelligence | StrategySim{% endblock %}
+
+{% block topbar_context %}Company Intelligence{% endblock %}
+
+{% block page_title %}Company Intelligence{% endblock %}
+
+{% block page_subtitle %}
+Explore and manage companies operating within the selected industry.
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900">
+                Company Directory
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Search, filter and access registered company profiles.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <a
+                href="{{ url_for('companies.industry_directory') }}"
+                class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+                View Industries
+            </a>
+
+            <a
+                href="{{ url_for('companies.create_company') }}"
+                class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+            >
+                <span class="mr-2 text-lg leading-none">+</span>
+                Add Company
+            </a>
+        </div>
+    </div>
+
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+        <div class="content-card p-5">
+            <p class="text-sm font-medium text-gray-500">
+                Total Companies
+            </p>
+            <p class="mt-2 text-2xl font-semibold text-gray-900">
+                {{ companies|length }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500">
+                Records on this page
+            </p>
+        </div>
+
+        <div class="content-card p-5">
+            <p class="text-sm font-medium text-gray-500">
+                Target Companies
+            </p>
+            <p class="mt-2 text-2xl font-semibold text-gray-900">
+                {{ companies|selectattr('company_type', 'equalto', 'Target')|list|length }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500">
+                Target organisation records on this page
+            </p>
+        </div>
+
+        <div class="content-card p-5">
+            <p class="text-sm font-medium text-gray-500">
+                Competitors
+            </p>
+            <p class="mt-2 text-2xl font-semibold text-gray-900">
+                {{ companies|selectattr('company_type', 'equalto', 'Competitor')|list|length }}
+            </p>
+            <p class="mt-1 text-xs text-gray-500">
+                Competitor records on this page
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- Search and Filters -->
+    <div class="content-card p-5">
+
+        <div class="mb-4">
+            <h3 class="text-base font-semibold text-gray-900">
+                Search and Filters
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                Narrow the directory using company name, industry or company type.
+            </p>
+        </div>
+
+        <form
+            method="GET"
+            action="{{ url_for('companies.company_directory') }}"
+            class="grid grid-cols-1 gap-4 md:grid-cols-4"
+        >
+
+            <!-- Search -->
+            <div class="md:col-span-2">
+                <label
+                    for="search"
+                    class="mb-1.5 block text-sm font-medium text-gray-700"
+                >
+                    Search Companies
+                </label>
+
+                <input
+                    type="text"
+                    id="search"
+                    name="search"
+                    value="{{ search or '' }}"
+                    placeholder="Search by company name, description or headquarters..."
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+            </div>
+
+
+            <!-- Industry Filter -->
+            <div>
+                <label
+                    for="industry_id"
+                    class="mb-1.5 block text-sm font-medium text-gray-700"
+                >
+                    Industry
+                </label>
+
+                <select
+                    id="industry_id"
+                    name="industry_id"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                    <option value="">All Industries</option>
+
+                    {% for industry in industries %}
+                        <option
+                            value="{{ industry.id }}"
+                            {% if selected_industry_id|string == industry.id|string %}selected{% endif %}
+                        >
+                            {{ industry.name }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+
+            <!-- Company Type Filter -->
+            <div>
+                <label
+                    for="company_type"
+                    class="mb-1.5 block text-sm font-medium text-gray-700"
+                >
+                    Company Type
+                </label>
+
+                <select
+                    id="company_type"
+                    name="company_type"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                    <option value="">All Types</option>
+
+                    <option
+                        value="Target"
+                        {% if selected_company_type == 'Target' %}selected{% endif %}
+                    >
+                        Target
+                    </option>
+
+                    <option
+                        value="Competitor"
+                        {% if selected_company_type == 'Competitor' %}selected{% endif %}
+                    >
+                        Competitor
+                    </option>
+
+                    <option
+                        value="Other"
+                        {% if selected_company_type == 'Other' %}selected{% endif %}
+                    >
+                        Other
+                    </option>
+
+                </select>
+            </div>
+
+
+            <!-- Actions -->
+            <div class="flex flex-wrap items-end gap-2 md:col-span-4">
+
+                <button
+                    type="submit"
+                    class="rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+                >
+                    Apply Filters
+                </button>
+
+                <a
+                    href="{{ url_for('companies.company_directory') }}"
+                    class="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                    Clear Filters
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- Company Table -->
+    <div class="content-card overflow-hidden">
+
+        <div class="flex flex-col gap-2 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="text-base font-semibold text-gray-900">
+                    Registered Companies
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Company records available in StrategySim.
+                </p>
+            </div>
+
+            <span class="text-sm text-gray-500">
+                {{ companies|length }} record(s) displayed
+            </span>
+
+        </div>
+
+
+        {% if companies %}
+
+            <div class="overflow-x-auto">
+
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <thead class="bg-gray-50">
+                        <tr>
+
+                            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Company
+                            </th>
+
+                            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Industry
+                            </th>
+
+                            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Company Type
+                            </th>
+
+                            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Headquarters
+                            </th>
+
+                            <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Data Classification
+                            </th>
+
+                            <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                Action
+                            </th>
+
+                        </tr>
+                    </thead>
+
+
+                    <tbody class="divide-y divide-gray-100 bg-white">
+
+                        {% for company in companies %}
+
+                            <tr class="transition hover:bg-gray-50">
+
+                                <!-- Company Name -->
+                                <td class="whitespace-nowrap px-5 py-4">
+
+                                    <div class="font-medium text-gray-900">
+                                        {{ company.name }}
+                                    </div>
+
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        Company ID: {{ company.id }}
+                                    </div>
+
+                                </td>
+
+
+                                <!-- Industry -->
+                                <td class="whitespace-nowrap px-5 py-4">
+
+                                    <span class="text-sm text-gray-700">
+                                        {{ company.industry_name or 'Not specified' }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Company Type -->
+                                <td class="whitespace-nowrap px-5 py-4">
+
+                                    {% if company.company_type == 'Target' %}
+
+                                        <span class="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                            Target
+                                        </span>
+
+                                    {% elif company.company_type == 'Competitor' %}
+
+                                        <span class="inline-flex rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
+                                            Competitor
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                            Other
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Headquarters -->
+                                <td class="px-5 py-4">
+
+                                    <span class="text-sm text-gray-700">
+                                        {{ company.headquarters or 'Not specified' }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- Data Classification -->
+                                <td class="whitespace-nowrap px-5 py-4">
+
+                                    {% if company.is_demo %}
+
+                                        <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                                            Illustrative
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                                            Standard Record
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Action -->
+                                <td class="whitespace-nowrap px-5 py-4 text-right">
+
+                                    <a
+                                        href="{{ url_for('companies.company_detail', company_id=company.id) }}"
+                                        class="text-sm font-medium text-blue-600 transition hover:text-blue-800"
+                                    >
+                                        View Profile
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <!-- Empty State -->
+            <div class="px-5 py-14 text-center">
+
+                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="1.7"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M3 7.5L12 3l9 4.5M3 7.5v9L12 21l9-4.5v-9M3 7.5l9 4.5m0 9v-9m9-4.5L12 12"
+                        />
+                    </svg>
+                </div>
+
+                <h3 class="mt-4 text-base font-semibold text-gray-900">
+                    No companies found
+                </h3>
+
+                <p class="mx-auto mt-2 max-w-md text-sm text-gray-500">
+                    No company records match your current search or filter criteria.
+                    You can clear the filters or register a new company.
+                </p>
+
+                <div class="mt-5 flex flex-wrap justify-center gap-2">
+
+                    <a
+                        href="{{ url_for('companies.company_directory') }}"
+                        class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                    >
+                        Clear Filters
+                    </a>
+
+                    <a
+                        href="{{ url_for('companies.create_company') }}"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                    >
+                        Add Company
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Directory Information -->
+    <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+
+        <div class="flex gap-3">
+
+            <div class="mt-0.5 text-blue-600">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 9v3.75m0 3h.008M10.29 3.86L1.82 18.5A1.75 1.75 0 003.34 21h17.32a1.75 1.75 0 001.52-2.5L13.71 3.86a1.75 1.75 0 00-3.42 0z"
+                    />
+                </svg>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-semibold text-blue-900">
+                    Data Classification
+                </h4>
+
+                <p class="mt-1 text-sm text-blue-800">
+                    Records marked as Illustrative represent demonstration or
+                    sample information. They must not be interpreted as verified
+                    industry facts or actual company disclosures.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

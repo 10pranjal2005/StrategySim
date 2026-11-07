@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Supply Chain Intelligence <span class="mx-2">/</span>
+Supplier Network <span class="mx-2">/</span> Facilities
+{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block page_subtitle %}
+Enter the facility's details and operational information.
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl space-y-6">
+
+    <section class="content-card">
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="space-y-5">
+
+                {% if facility is defined %}
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-slate-700">
+                        Supplier
+                    </label>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+                        {{ facility.supplier_name }}
+                    </div>
+                </div>
+                {% else %}
+                <div>
+                    {{ form.supplier_id.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.supplier_id(class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm") }}
+                    {% for error in form.supplier_id.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div>
+                    {{ form.facility_name.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.facility_name(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="Enter facility name") }}
+                    {% for error in form.facility_name.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.facility_type.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.facility_type(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="Manufacturing Plant, Warehouse, Distribution Centre...") }}
+                    {% for error in form.facility_type.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                        {{ form.country.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                        {{ form.country(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="Country") }}
+                        {% for error in form.country.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        {{ form.city.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                        {{ form.city(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", placeholder="City") }}
+                        {% for error in form.city.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    {{ form.capacity_description.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.capacity_description(class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm", rows="4", placeholder="Describe production capacity, storage capacity or facility capabilities...") }}
+                    {% for error in form.capacity_description.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.operational_status.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.operational_status(class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm") }}
+                    {% for error in form.operational_status.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="mt-7 flex justify-end gap-3 border-t border-slate-200 pt-5">
+
+                <a href="{{ url_for('supplier_facilities.index') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Cancel
+                </a>
+
+                {{ form.submit(class="cursor-pointer rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800") }}
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+{% endblock %}

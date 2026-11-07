@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Decision History | StrategySim{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div>
+        <a href="{{ url_for('strategic_decisions.index') }}"
+           class="text-sm text-blue-600 hover:text-blue-800">
+            ← Back to Strategic Decisions
+        </a>
+
+        <h1 class="text-2xl font-bold text-gray-900 mt-3">
+            Decision History
+        </h1>
+
+        <p class="text-sm text-gray-500 mt-1">
+            Review previously created strategic decision matrices.
+        </p>
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white">
+
+        <div class="border-b border-gray-200 px-5 py-4">
+            <h2 class="font-semibold text-gray-900">
+                All Strategic Decisions
+            </h2>
+        </div>
+
+        {% if matrices %}
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Decision
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Company
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
+                            Alternatives
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
+                            Criteria
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Created By
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase text-gray-500">
+                            Created At
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase text-gray-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+
+                    {% for matrix in matrices %}
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-5 py-4">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ matrix.matrix_name }}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ matrix.objective or "No objective" }}
+                            </p>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ matrix.company_name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-center text-sm text-gray-700">
+                            {{ matrix.option_count }}
+                        </td>
+
+                        <td class="px-5 py-4 text-center text-sm text-gray-700">
+                            {{ matrix.criterion_count }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ matrix.creator_name or "Unknown" }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-500">
+                            {{ matrix.created_at }}
+                        </td>
+
+                        <td class="px-5 py-4 text-right">
+                            <a href="{{ url_for('strategic_decisions.detail', matrix_id=matrix.id) }}"
+                               class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                View →
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="px-6 py-14 text-center">
+            <h3 class="font-semibold text-gray-900">
+                No decision history available
+            </h3>
+            <p class="text-sm text-gray-500 mt-2">
+                Strategic decisions will appear here once created.
+            </p>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

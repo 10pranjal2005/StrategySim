@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assessment.assessment_name }} | Value Chain Analysis{% endblock %}
+{% block topbar_context %}Strategic Analysis{% endblock %}
+{% block page_title %}Value Chain Assessment{% endblock %}
+{% block page_subtitle %}
+Review the company's Primary and Support Activities and their contribution to competitive advantage.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Assessment Overview -->
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Assessment #{{ assessment.id }}
+                </p>
+
+                <h2 class="mt-2 text-xl font-semibold text-gray-900">
+                    {{ assessment.assessment_name }}
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ assessment.company_name or 'Company not specified' }}
+                </p>
+            </div>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <div class="flex flex-wrap gap-2">
+
+                <a href="{{ url_for('value_chain.edit', assessment_id=assessment.id) }}"
+                   class="inline-flex justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Edit Assessment
+                </a>
+
+                <form method="POST"
+                      action="{{ url_for('value_chain.delete', assessment_id=assessment.id) }}"
+                      onsubmit="return confirm('Delete this Value Chain assessment and all its activities?');">
+
+                    {{ delete_form.hidden_tag() }}
+
+                    <button type="submit"
+                            class="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
+                        Delete Assessment
+                    </button>
+                </form>
+
+            </div>
+            {% endif %}
+
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-4 border-t border-gray-100 pt-5 sm:grid-cols-3">
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Assessment Date
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ assessment.assessment_date or 'Not specified' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Created By
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ assessment.created_by_name or '—' }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Total Activities
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    {{ assessment.activities|length }}
+                </p>
+            </div>
+
+        </div>
+
+        {% if assessment.summary %}
+        <div class="mt-5 border-t border-gray-100 pt-5">
+            <h3 class="text-sm font-semibold text-gray-900">
+                Assessment Summary
+            </h3>
+
+            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">
+                {{ assessment.summary }}
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Activity Overview -->
+
+    {% set primary_activities = assessment.activities|selectattr('activity_category', 'equalto', 'Primary')|list %}
+    {% set support_activities = assessment.activities|selectattr('activity_category', 'equalto', 'Support')|list %}
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+        <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Primary Activities
+            </p>
+
+            <p class="mt-2 text-2xl font-semibold text-gray-900">
+                {{ primary_activities|length }}
+            </p>
+
+            <p class="mt-1 text-sm text-gray-500">
+                Direct value-generating activities
+            </p>
+        </div>
+
+        <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Support Activities
+            </p>
+
+            <p class="mt-2 text-2xl font-semibold text-gray-900">
+                {{ support_activities|length }}
+            </p>
+
+            <p class="mt-1 text-sm text-gray-500">
+                Activities enabling primary operations
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Primary Activities -->
+
+    <div class="content-card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+        <div class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="font-semibold text-gray-900">
+                    Primary Activities
+                </h3>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Activities directly involved in creating and delivering value.
+                </p>
+            </div>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <a href="{{ url_for('value_chain.create_activity', assessment_id=assessment.id) }}?category=Primary"
+               class="inline-flex justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                + Add Primary Activity
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% if primary_activities %}
+        <div class="divide-y divide-gray-100">
+
+            {% for activity in primary_activities %}
+            <div class="p-5">
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                    <div class="min-w-0 flex-1">
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h4 class="font-semibold text-gray-900">
+                                {{ activity.activity_name }}
+                            </h4>
+
+                            <span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                Primary
+                            </span>
+                        </div>
+
+                        {% if activity.description %}
+                        <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">
+                            {{ activity.description }}
+                        </p>
+                        {% endif %}
+
+                        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+
+                            <div>
+                                <p class="text-xs text-gray-500">Cost Contribution</p>
+                                <p class="mt-1 text-sm font-medium text-gray-900">
+                                    {% if activity.cost_contribution is not none %}
+                                        {{ activity.cost_contribution }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500">Strategic Importance</p>
+                                <p class="mt-1 text-sm font-medium text-gray-900">
+                                    {% if activity.strategic_importance %}
+                                        {{ activity.strategic_importance }} / 5
+                                    {% else %}
+                                        Not rated
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500">Evidence</p>
+                                <p class="mt-1 text-sm font-medium text-gray-900">
+                                    {{ activity.evidence_title or 'Not linked' }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                        {% if activity.competitive_advantage %}
+                        <div class="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                            <p class="text-xs font-semibold text-gray-700">
+                                Competitive Advantage
+                            </p>
+                            <p class="mt-1 whitespace-pre-line text-sm text-gray-600">
+                                {{ activity.competitive_advantage }}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    {% if current_user.has_role('Administrator', 'Analyst') %}
+                    <div class="flex shrink-0 items-center gap-3">
+
+                        <a href="{{ url_for('value_chain.edit_activity', activity_id=activity.id) }}"
+                           class="text-xs font-medium text-blue-600 hover:text-blue-800">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                              action="{{ url_for('value_chain.delete_activity', activity_id=activity.id) }}"
+                              onsubmit="return confirm('Delete this activity?');">
+
+                            {{ delete_form.hidden_tag() }}
+
+                            <button type="submit"
+                                    class="text-xs font-medium text-red-600 hover:text-red-800">
+                                Delete
+                            </button>
+                        </form>
+
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+        <div class="px-5 py-10 text-center">
+            <p class="text-sm text-gray-500">
+                No Primary Activities have been recorded yet.
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Support Activities -->
+
+    <div class="content-card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+        <div class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="font-semibold text-gray-900">
+                    Support Activities
+                </h3>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Activities that support and strengthen primary operations.
+                </p>
+            </div>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <a href="{{ url_for('value_chain.create_activity', assessment_id=assessment.id) }}?category=Support"
+               class="inline-flex justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                + Add Support Activity
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% if support_activities %}
+        <div class="divide-y divide-gray-100">
+
+            {% for activity in support_activities %}
+            <div class="p-5">
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+                    <div class="min-w-0 flex-1">
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h4 class="font-semibold text-gray-900">
+                                {{ activity.activity_name }}
+                            </h4>
+
+                            <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                Support
+                            </span>
+                        </div>
+
+                        {% if activity.description %}
+                        <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-600">
+                            {{ activity.description }}
+                        </p>
+                        {% endif %}
+
+                        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+
+                            <div>
+                                <p class="text-xs text-gray-500">Cost Contribution</p>
+                                <p class="mt-1 text-sm font-medium text-gray-900">
+                                    {% if activity.cost_contribution is not none %}
+                                        {{ activity.cost_contribution }}
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500">Strategic Importance</p>
+                                <p class="mt-1 text-sm font-medium text-gray-900">
+                                    {% if activity.strategic_importance %}
+                                        {{ activity.strategic_importance }} / 5
+                                    {% else %}
+                                        Not rated
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div>
+                                <p class="text-xs text-gray-500">Evidence</p>
+                                <p class="mt-1 text-sm font-medium text-gray-900">
+                                    {{ activity.evidence_title or 'Not linked' }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                        {% if activity.competitive_advantage %}
+                        <div class="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+                            <p class="text-xs font-semibold text-gray-700">
+                                Competitive Advantage
+                            </p>
+                            <p class="mt-1 whitespace-pre-line text-sm text-gray-600">
+                                {{ activity.competitive_advantage }}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                    {% if current_user.has_role('Administrator', 'Analyst') %}
+                    <div class="flex shrink-0 items-center gap-3">
+
+                        <a href="{{ url_for('value_chain.edit_activity', activity_id=activity.id) }}"
+                           class="text-xs font-medium text-blue-600 hover:text-blue-800">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                              action="{{ url_for('value_chain.delete_activity', activity_id=activity.id) }}"
+                              onsubmit="return confirm('Delete this activity?');">
+
+                            {{ delete_form.hidden_tag() }}
+
+                            <button type="submit"
+                                    class="text-xs font-medium text-red-600 hover:text-red-800">
+                                Delete
+                            </button>
+                        </form>
+
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+        <div class="px-5 py-10 text-center">
+            <p class="text-sm text-gray-500">
+                No Support Activities have been recorded yet.
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Navigation -->
+
+    <div>
+        <a href="{{ url_for('value_chain.index') }}"
+           class="text-sm font-medium text-gray-600 hover:text-gray-900">
+            ← Back to Value Chain Assessments
+        </a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if request.endpoint == 'five_forces.edit' %}
+        Edit Assessment | StrategySim
+    {% else %}
+        New Assessment | StrategySim
+    {% endif %}
+{% endblock %}
+
+{% block topbar_context %}Strategic Analysis{% endblock %}
+
+{% block page_title %}
+    {% if request.endpoint == 'five_forces.edit' %}
+        Edit Five Forces Assessment
+    {% else %}
+        New Five Forces Assessment
+    {% endif %}
+{% endblock %}
+
+{% block page_subtitle %}
+    {% if request.endpoint == 'five_forces.edit' %}
+        Update the assessment details and strategic context.
+    {% else %}
+        Set up an assessment before evaluating the five competitive forces.
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl space-y-6">
+
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="mb-6 border-b border-gray-200 pb-4">
+            <h2 class="text-lg font-semibold text-gray-900">
+                Assessment Details
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Provide the company and basic information for this analysis.
+            </p>
+        </div>
+
+        <form method="POST"
+              class="space-y-5"
+              novalidate>
+
+            {{ form.hidden_tag() }}
+
+            {% if request.endpoint == 'five_forces.edit' %}
+                {{ form.company_id() }}
+            {% else %}
+            <div>
+                {{ form.company_id.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.company_id(
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                ) }}
+
+                {% for error in form.company_id.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div>
+                {{ form.assessment_name.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.assessment_name(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    placeholder="Example: Indian Electric Two-Wheeler Industry Analysis"
+                ) }}
+
+                {% for error in form.assessment_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.assessment_date.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.assessment_date(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                ) }}
+
+                {% for error in form.assessment_date.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.summary.label(
+                    class="mb-1 block text-sm font-medium text-gray-700"
+                ) }}
+
+                {{ form.summary(
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none",
+                    rows="5",
+                    placeholder="Describe the purpose, scope, market context, and key considerations for this assessment..."
+                ) }}
+
+                {% for error in form.summary.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <h3 class="text-sm font-semibold text-blue-900">
+                    What happens next?
+                </h3>
+
+                <p class="mt-1 text-sm text-blue-800">
+                    After saving this assessment, you can add indicators under
+                    each of the five forces. The system calculates individual
+                    force scores and the overall competitive pressure score.
+                </p>
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:justify-end">
+
+                {% if request.endpoint == 'five_forces.edit' %}
+                    <a href="{{ url_for('five_forces.detail', assessment_id=request.view_args.assessment_id) }}"
+                       class="inline-flex justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('five_forces.index') }}"
+                       class="inline-flex justify-center rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                {% endif %}
+
+                <button type="submit"
+                        class="inline-flex justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+
+                    {% if request.endpoint == 'five_forces.edit' %}
+                        Save Changes
+                    {% else %}
+                        Create Assessment
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

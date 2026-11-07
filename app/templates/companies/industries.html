@@ -1,0 +1,325 @@
+
+{% extends "base.html" %}
+
+{% block title %}Industry Directory | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Workspace <span class="mx-2">/</span>
+<a href="{{ url_for('companies.company_directory') }}"
+   class="hover:text-blue-700">Company Intelligence</a>
+<span class="mx-2">/</span> Industries
+{% endblock %}
+
+{% block page_title %}Industry Intelligence{% endblock %}
+
+{% block page_subtitle %}
+Explore industry classifications, geographical markets, and associated companies.
+{% endblock %}
+
+{% block content %}
+
+<div class="space-y-6">
+
+    <!-- Directory overview -->
+    <section class="content-card">
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <p class="text-sm text-slate-500">Industry directory</p>
+
+                <h2 class="mt-1 text-xl font-semibold text-slate-900">
+                    Registered Industries
+                </h2>
+
+                <p class="mt-1 text-sm text-slate-500">
+                    Browse and manage the industries configured in StrategySim.
+                </p>
+            </div>
+
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+            <a href="{{ url_for('companies.create_industry') }}"
+               class="inline-flex items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+                <span class="mr-2 text-lg leading-none">+</span>
+                Add Industry
+            </a>
+            {% endif %}
+
+        </div>
+
+        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Industries displayed</p>
+                <p class="mt-1 text-2xl font-semibold text-slate-900">
+                    {{ industries|length }}
+                </p>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm text-slate-500">Geographical filter</p>
+                <p class="mt-1 text-lg font-semibold text-slate-900">
+                    {{ geography if geography else 'All regions' }}
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Search and filters -->
+    <section class="content-card">
+
+        <form method="GET"
+              action="{{ url_for('companies.industry_directory') }}"
+              class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+
+            <div class="lg:col-span-6">
+
+                <label for="search"
+                       class="mb-2 block text-sm font-medium text-slate-700">
+                    Search industry
+                </label>
+
+                <input type="text"
+                       id="search"
+                       name="search"
+                       value="{{ search }}"
+                       placeholder="Enter industry name"
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+
+            </div>
+
+
+            <div class="lg:col-span-4">
+
+                <label for="geography"
+                       class="mb-2 block text-sm font-medium text-slate-700">
+                    Geography
+                </label>
+
+                <input type="text"
+                       id="geography"
+                       name="geography"
+                       value="{{ geography }}"
+                       placeholder="e.g. India"
+                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+
+            </div>
+
+
+            <div class="flex items-end gap-2 lg:col-span-2">
+
+                <button type="submit"
+                        class="flex-1 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+                    Apply
+                </button>
+
+                <a href="{{ url_for('companies.industry_directory') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                    Reset
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- Industry records -->
+    <section class="content-card">
+
+        <div class="border-b border-slate-200 pb-4">
+            <h2 class="text-lg font-semibold text-slate-900">
+                Industry Records
+            </h2>
+
+            <p class="mt-1 text-sm text-slate-500">
+                {{ industries|length }} industry record(s) match the selected filters.
+            </p>
+        </div>
+
+
+        {% if industries %}
+
+        <div class="mt-4 overflow-x-auto">
+
+            <table class="w-full min-w-[850px] border-collapse text-left">
+
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50">
+
+                        <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Industry
+                        </th>
+
+                        <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Sector
+                        </th>
+
+                        <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Industry Type
+                        </th>
+
+                        <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Geography
+                        </th>
+
+                        <th class="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Companies
+                        </th>
+
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Action
+                        </th>
+
+                    </tr>
+                </thead>
+
+
+                <tbody class="divide-y divide-slate-100">
+
+                    {% for industry in industries %}
+
+                    <tr class="transition hover:bg-slate-50">
+
+                        <!-- Industry name -->
+                        <td class="px-4 py-4">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-semibold text-blue-700">
+                                    {{ industry.name[:1]|upper }}
+                                </div>
+
+                                <div>
+                                    <a href="{{ url_for('companies.industry_detail', industry_id=industry.id) }}"
+                                       class="font-semibold text-slate-900 hover:text-blue-700">
+                                        {{ industry.name }}
+                                    </a>
+
+                                    <p class="mt-1 text-xs text-slate-400">
+                                        Industry ID: {{ industry.id }}
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Sector -->
+                        <td class="px-4 py-4 text-sm text-slate-600">
+                            {{ industry.sector or 'Not specified' }}
+                        </td>
+
+
+                        <!-- Industry type -->
+                        <td class="px-4 py-4 text-sm text-slate-600">
+                            {{ industry.industry_type or 'Not specified' }}
+                        </td>
+
+
+                        <!-- Geography -->
+                        <td class="px-4 py-4 text-sm text-slate-600">
+                            {{ industry.geography or 'Not specified' }}
+                        </td>
+
+
+                        <!-- Company count -->
+                        <td class="px-4 py-4">
+
+                            <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                                {{ industry.company_count or 0 }}
+                            </span>
+
+                        </td>
+
+
+                        <!-- Action -->
+                        <td class="px-4 py-4 text-right">
+
+                            <a href="{{ url_for('companies.industry_detail', industry_id=industry.id) }}"
+                               class="inline-flex items-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700">
+                                View Profile
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <!-- Empty state -->
+        <div class="flex min-h-[250px] flex-col items-center justify-center px-6 py-12 text-center">
+
+            <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     class="h-7 w-7">
+
+                    <path d="M3 21h18"/>
+                    <path d="M5 21V7l8-4v18"/>
+                    <path d="M19 21V11l-6-4"/>
+                    <path d="M9 9v.01M9 12v.01M9 15v.01"/>
+                    <path d="M16 13v.01M16 16v.01M16 19v.01"/>
+
+                </svg>
+
+            </div>
+
+            <h3 class="text-lg font-semibold text-slate-900">
+                No industries found
+            </h3>
+
+            <p class="mt-2 max-w-md text-sm text-slate-500">
+                No industry records match your selected search criteria.
+                Try modifying your search or geographical filter.
+            </p>
+
+            {% if search or geography %}
+
+            <a href="{{ url_for('companies.industry_directory') }}"
+               class="mt-5 text-sm font-semibold text-blue-700 hover:text-blue-800">
+                Clear all filters
+            </a>
+
+            {% elif current_user.role in ['Administrator', 'Analyst'] %}
+
+            <a href="{{ url_for('companies.create_industry') }}"
+               class="mt-5 inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800">
+                Add your first industry
+            </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- Information note -->
+    <p class="text-xs leading-5 text-slate-400">
+        Industry classifications should be based on a consistent and verifiable
+        understanding of the relevant market and geographical scope.
+    </p>
+
+</div>
+
+{% endblock %}

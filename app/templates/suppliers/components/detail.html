@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}{{ component.name }} | StrategySim{% endblock %}
+{% block topbar_context %}Supplier Network{% endblock %}
+{% block page_title %}Component Details{% endblock %}
+{% block page_subtitle %}Component information and supply-chain classification.{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <a href="{{ url_for('supplier_components.index') }}"
+           class="text-sm font-medium text-gray-600 hover:text-gray-900">
+            &larr; Back to Component Register
+        </a>
+
+        {% if current_user.role in ['Administrator', 'Analyst'] %}
+        <a href="{{ url_for('supplier_components.edit', component_id=component.id) }}"
+           class="inline-flex justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            Edit Component
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <h2 class="text-2xl font-semibold text-gray-900">
+                    {{ component.name }}
+                </h2>
+                <p class="mt-2 text-sm text-gray-500">
+                    Component Code:
+                    <span class="font-medium text-gray-700">
+                        {{ component.component_code or 'Not assigned' }}
+                    </span>
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <span class="rounded-full px-3 py-1 text-xs font-medium
+                    {% if component.criticality == 'Critical' %}
+                        bg-red-100 text-red-700
+                    {% elif component.criticality == 'High' %}
+                        bg-orange-100 text-orange-700
+                    {% elif component.criticality == 'Medium' %}
+                        bg-yellow-100 text-yellow-700
+                    {% else %}
+                        bg-green-100 text-green-700
+                    {% endif %}">
+                    {{ component.criticality }} Criticality
+                </span>
+
+                {% if component.is_active %}
+                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                        Active
+                    </span>
+                {% else %}
+                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+                        Inactive
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900">
+                Component Information
+            </h3>
+
+            <div class="mt-4 divide-y divide-gray-100">
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Component ID</span>
+                    <span class="text-sm font-medium text-gray-900">{{ component.id }}</span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Category</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {{ component.category or 'Unclassified' }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Criticality</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {{ component.criticality }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Status</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {{ 'Active' if component.is_active else 'Inactive' }}
+                    </span>
+                </div>
+
+                <div class="flex justify-between gap-4 py-3">
+                    <span class="text-sm text-gray-500">Created At</span>
+                    <span class="text-sm text-gray-900">
+                        {{ component.created_at or 'Not available' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900">
+                Description
+            </h3>
+
+            <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-600">
+                {{ component.description or 'No description has been provided.' }}
+            </p>
+        </div>
+
+    </div>
+
+        <!-- Associated Suppliers -->
+    <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Associated Suppliers
+                </h3>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Suppliers currently mapped to this component.
+                </p>
+            </div>
+
+            {% if current_user.role in ['Administrator', 'Analyst'] %}
+                <a href="{{ url_for(
+                    'supplier_components.create_mapping',
+                    component_id=component.id
+                ) }}"
+                   class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                    + Add Supplier
+                </a>
+            {% endif %}
+
+        </div>
+
+        {% if component_suppliers %}
+
+            <div class="mt-5 overflow-x-auto">
+
+                <table class="min-w-full divide-y divide-gray-200">
+
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Supplier
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Risk Level
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Unit Cost
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Lead Time
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Dependency Share
+                            </th>
+
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                Alternative
+                            </th>
+
+                            {% if current_user.role in ['Administrator', 'Analyst'] %}
+                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                    Actions
+                                </th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100 bg-white">
+
+                        {% for mapping in component_suppliers %}
+
+                            <tr>
+
+                                <td class="px-4 py-4">
+
+                                    <a href="{{ url_for(
+                                        'suppliers.detail',
+                                        supplier_id=mapping['supplier_id']
+                                    ) }}"
+                                       class="font-medium text-blue-600 hover:text-blue-800">
+                                        {{ mapping['supplier_name'] }}
+                                    </a>
+
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        {{ mapping['supplier_code'] or 'No supplier code' }}
+                                    </p>
+
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {{ mapping['risk_level'] or 'Not assessed' }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {{ mapping['unit_cost'] if mapping['unit_cost'] is not none else 'Not specified' }}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {% if mapping['lead_time_days'] is not none %}
+                                        {{ mapping['lead_time_days'] }} days
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm text-gray-700">
+                                    {% if mapping['dependency_share_percent'] is not none %}
+                                        {{ mapping['dependency_share_percent'] }}%
+                                    {% else %}
+                                        Not specified
+                                    {% endif %}
+                                </td>
+
+                                <td class="px-4 py-4 text-sm">
+                                    {% if mapping['is_alternative'] %}
+                                        <span class="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                                            Yes
+                                        </span>
+                                    {% else %}
+                                        <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                                            No
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                {% if current_user.role in ['Administrator', 'Analyst'] %}
+                                    <td class="px-4 py-4 text-right whitespace-nowrap">
+
+                                        <a href="{{ url_for(
+                                            'supplier_components.edit_mapping',
+                                            mapping_id=mapping['id']
+                                        ) }}"
+                                           class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                            Edit
+                                        </a>
+
+                                        <form method="POST"
+                                              action="{{ url_for(
+                                                  'supplier_components.delete_mapping',
+                                                  mapping_id=mapping['id']
+                                              ) }}"
+                                              class="inline ml-3"
+                                              onsubmit="return confirm('Remove this supplier-component mapping?');">
+
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                            <button type="submit"
+                                                    class="text-sm font-medium text-red-600 hover:text-red-800">
+                                                Remove
+                                            </button>
+
+                                        </form>
+
+                                    </td>
+                                {% endif %}
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center">
+
+                <p class="text-sm font-medium text-gray-700">
+                    No suppliers mapped to this component.
+                </p>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Use Add Supplier to associate a supplier with this component.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    {% if current_user.role in ['Administrator', 'Analyst'] %}
+    <div class="rounded-xl border border-red-200 bg-white p-6 shadow-sm">
+        <h3 class="text-base font-semibold text-red-700">
+            Delete Component
+        </h3>
+
+        <p class="mt-2 text-sm text-gray-600">
+            Components referenced by supplier mappings or procurement records
+            may not be deletable until those references are resolved.
+        </p>
+
+        <form method="POST"
+              action="{{ url_for('supplier_components.delete', component_id=component.id) }}"
+              class="mt-4"
+              onsubmit="return confirm('Are you sure you want to delete this component?');">
+
+            {{ delete_form.hidden_tag() }}
+
+            <button type="submit"
+                    class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50">
+                Delete Component
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

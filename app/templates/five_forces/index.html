@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Porter's Five Forces | StrategySim{% endblock %}
+{% block topbar_context %}Strategic Analysis{% endblock %}
+{% block page_title %}Porter's Five Forces{% endblock %}
+{% block page_subtitle %}
+Evaluate competitive pressure across buyers, suppliers, rivalry, substitutes, and new market entrants.
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Page Header -->
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900">
+                Five Forces Assessments
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Review and manage competitive forces assessments for your companies.
+            </p>
+        </div>
+
+        {% if current_user.has_role('Administrator', 'Analyst') %}
+        <a href="{{ url_for('five_forces.create') }}"
+           class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
+            + New Assessment
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filters -->
+    <div class="content-card rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <form method="GET"
+              action="{{ url_for('five_forces.index') }}"
+              class="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+            <div>
+                <label for="search"
+                       class="mb-1 block text-sm font-medium text-gray-700">
+                    Search
+                </label>
+
+                <input type="text"
+                       id="search"
+                       name="search"
+                       value="{{ request.args.get('search', '') }}"
+                       placeholder="Search assessment name..."
+                       class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label for="company_id"
+                       class="mb-1 block text-sm font-medium text-gray-700">
+                    Company
+                </label>
+
+                <select id="company_id"
+                        name="company_id"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+
+                    <option value="">All Companies</option>
+
+                    {% for company in companies %}
+                    <option value="{{ company.id }}"
+                        {% if request.args.get('company_id', '')|string == company.id|string %}
+                            selected
+                        {% endif %}>
+                        {{ company.name }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <div class="flex items-end gap-2">
+                <button type="submit"
+                        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700">
+                    Apply Filters
+                </button>
+
+                <a href="{{ url_for('five_forces.index') }}"
+                   class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Clear
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Assessment Register -->
+    <div class="content-card overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+
+        <div class="border-b border-gray-200 px-5 py-4">
+            <h3 class="font-semibold text-gray-900">
+                Assessment Register
+            </h3>
+            <p class="mt-1 text-sm text-gray-500">
+                Each assessment contains five competitive force evaluations.
+            </p>
+        </div>
+
+        {% if assessments %}
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Assessment
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Company
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Assessment Date
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Overall Pressure
+                        </th>
+
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Status
+                        </th>
+
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+
+                    {% for item in assessments %}
+                    <tr class="hover:bg-gray-50">
+
+                        <td class="px-5 py-4">
+                            <div class="font-medium text-gray-900">
+                                {{ item.assessment_name }}
+                            </div>
+
+                            <div class="mt-1 text-xs text-gray-500">
+                                ID: {{ item.id }}
+                            </div>
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ item.company_name or '—' }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-700">
+                            {{ item.assessment_date or '—' }}
+                        </td>
+
+                        <td class="px-5 py-4">
+                            {% if item.overall_score is not none %}
+                            <span class="text-sm font-semibold text-gray-900">
+                                {{ "%.2f"|format(item.overall_score) }} / 5
+                            </span>
+                            {% else %}
+                            <span class="text-sm text-gray-400">
+                                Not available
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-5 py-4">
+                            {% if item.overall_score is not none %}
+                            <span class="inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                                Complete
+                            </span>
+                            {% else %}
+                            <span class="inline-flex rounded-full bg-yellow-50 px-2.5 py-1 text-xs font-medium text-yellow-700">
+                                In Progress
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-5 py-4 text-right">
+                            <a href="{{ url_for('five_forces.detail', assessment_id=item.id) }}"
+                               class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                                View Assessment
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="px-5 py-12 text-center">
+
+            <h3 class="text-base font-semibold text-gray-900">
+                No Five Forces assessments found
+            </h3>
+
+            <p class="mt-2 text-sm text-gray-500">
+                Create an assessment to begin evaluating competitive pressure in the industry.
+            </p>
+
+            {% if current_user.has_role('Administrator', 'Analyst') %}
+            <a href="{{ url_for('five_forces.create') }}"
+               class="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                Create First Assessment
+            </a>
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Scoring Guidance -->
+    <div class="rounded-xl border border-gray-200 bg-gray-50 p-5">
+
+        <h3 class="text-sm font-semibold text-gray-900">
+            Scoring Guide
+        </h3>
+
+        <p class="mt-2 text-sm text-gray-600">
+            Each force is evaluated on a scale of 1 to 5. A higher score indicates
+            stronger competitive pressure on the company.
+        </p>
+
+        <div class="mt-3 grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+
+            <div>
+                <span class="font-semibold text-gray-900">1</span>
+                <p class="text-xs text-gray-500">Very Low</p>
+            </div>
+
+            <div>
+                <span class="font-semibold text-gray-900">2</span>
+                <p class="text-xs text-gray-500">Low</p>
+            </div>
+
+            <div>
+                <span class="font-semibold text-gray-900">3</span>
+                <p class="text-xs text-gray-500">Moderate</p>
+            </div>
+
+            <div>
+                <span class="font-semibold text-gray-900">4</span>
+                <p class="text-xs text-gray-500">High</p>
+            </div>
+
+            <div>
+                <span class="font-semibold text-gray-900">5</span>
+                <p class="text-xs text-gray-500">Very High</p>
+            </div>
+
+        </div>
+
+        <p class="mt-3 text-xs text-gray-500">
+            The overall score is calculated only after all five forces have at least one indicator.
+        </p>
+
+    </div>
+
+</div>
+{% endblock %}

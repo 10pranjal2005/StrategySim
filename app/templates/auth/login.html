@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sign In | StrategySim</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/auth.css') }}">
+</head>
+
+<body class="auth-page">
+
+<div class="auth-shell">
+
+    <!-- LEFT BRAND PANEL -->
+    <section class="auth-brand-panel">
+
+        <div class="auth-brand-content">
+
+            <div class="auth-brand-kicker">
+                <span></span>
+                STRATEGIC INTELLIGENCE PLATFORM
+            </div>
+
+            <h1 class="auth-brand-name">
+                StrategySim<span>.</span>
+            </h1>
+
+            <p class="auth-brand-description">
+                A centralized strategic intelligence and decision
+                support platform for analysing industries, evaluating
+                competition, understanding supply chains, and making
+                informed business decisions.
+            </p>
+
+            <div class="auth-feature-list">
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8">
+                            <rect x="3" y="3" width="8" height="8" rx="1"/>
+                            <rect x="13" y="3" width="8" height="5" rx="1"/>
+                            <rect x="13" y="10" width="8" height="11" rx="1"/>
+                            <rect x="3" y="13" width="8" height="8" rx="1"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3 class="auth-feature-title">
+                            Strategic Intelligence
+                        </h3>
+                        <p class="auth-feature-description">
+                            Understand companies, industries and competitors.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8">
+                            <circle cx="5" cy="6" r="2"/>
+                            <circle cx="19" cy="6" r="2"/>
+                            <circle cx="12" cy="18" r="2"/>
+                            <path d="m7 7 4 9M17 7l-4 9M7 6h10"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3 class="auth-feature-title">
+                            Supply Chain Intelligence
+                        </h3>
+                        <p class="auth-feature-description">
+                            Map supplier networks and evaluate dependencies.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">
+                        <svg viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8">
+                            <path d="M4 19V5"/>
+                            <path d="M4 19h16"/>
+                            <path d="m7 15 4-4 3 3 5-7"/>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h3 class="auth-feature-title">
+                            Decision Support
+                        </h3>
+                        <p class="auth-feature-description">
+                            Simulate scenarios and evaluate strategic choices.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <!-- RIGHT LOGIN PANEL -->
+    <main class="auth-form-panel">
+
+        <div class="auth-form-wrapper">
+
+            <div class="auth-heading">
+                <h1>Welcome Back</h1>
+                <p>Please enter your credentials</p>
+            </div>
+
+            <div class="auth-card">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="auth-flash {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST"
+                      action="{{ url_for('auth.login') }}"
+                      novalidate>
+
+                    {{ form.hidden_tag() }}
+
+                    <div class="auth-field">
+                        <label class="auth-label"
+                               for="{{ form.email.id }}">
+                            Email Address
+                        </label>
+
+                        {{ form.email(
+                            class="auth-input",
+                            placeholder="Enter your email address",
+                            autocomplete="email",
+                            required=true
+                        ) }}
+
+                        {% for error in form.email.errors %}
+                            <p class="auth-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="auth-field">
+
+                        <label class="auth-label"
+                            for="{{ form.password.id }}">
+                            Account Password
+                        </label>
+
+                        <div class="auth-password-wrapper">
+
+                            {{ form.password(
+                                class="auth-input",
+                                placeholder="Enter your password",
+                                autocomplete="current-password",
+                                required=true
+                            ) }}
+
+                            <button
+                                type="button"
+                                class="auth-password-toggle"
+                                data-password-toggle
+                                data-target="{{ form.password.id }}"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                                title="Show password"
+                            >
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7Z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+
+                        </div>
+
+                        {% for error in form.password.errors %}
+                            <p class="auth-field-error">{{ error }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                    <button type="submit" class="auth-submit">
+                        SIGN IN <span aria-hidden="true">›</span>
+                    </button>
+
+                </form>
+
+                <p class="auth-switch">
+                    Don't have an account?
+                    <a href="{{ url_for('auth.register') }}">
+                        Create an account
+                    </a>
+                </p>
+
+            </div>
+
+            <div class="auth-security-note">
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8">
+                    <path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                </svg>
+
+                SECURE AUTHENTICATION PROTOCOL ACTIVE
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+<script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+</body>
+</html>

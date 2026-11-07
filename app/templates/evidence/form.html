@@ -1,0 +1,189 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | StrategySim{% endblock %}
+
+{% block topbar_context %}
+Strategic Analysis <span class="mx-2">/</span>
+<a href="{{ url_for('evidence.index') }}" class="hover:text-blue-700">Evidence</a>
+<span class="mx-2">/</span> {{ page_title }}
+{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block page_subtitle %}
+Register a research source or supporting document in the shared evidence repository.
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-4xl space-y-6">
+
+    <section class="content-card">
+        <div class="mb-5 border-b border-slate-100 pb-4">
+            <h2 class="text-base font-semibold text-slate-900">
+                Evidence Information
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+                Provide the source details and assess its reliability.
+            </p>
+        </div>
+
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+
+            {% if form.errors %}
+            <div class="rounded-lg border border-red-200 bg-red-50 p-4">
+                <p class="text-sm font-semibold text-red-800">
+                    Please correct the following errors:
+                </p>
+                <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+                    {% for field_name, errors in form.errors.items() %}
+                        {% for error in errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div>
+                {{ form.title.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                {{ form.title(
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                    placeholder="Enter a descriptive evidence title"
+                ) }}
+                {% for error in form.title.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.description.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                {{ form.description(
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                    rows="4",
+                    placeholder="Describe what this evidence contains and why it is relevant."
+                ) }}
+                {% for error in form.description.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                    {{ form.source_type.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.source_type(
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    ) }}
+                    {% for error in form.source_type.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.source_name.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.source_name(
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                        placeholder="Publisher, organisation, or author"
+                    ) }}
+                    {% for error in form.source_name.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                {{ form.source_url.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                {{ form.source_url(
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                    placeholder="https://example.com/source"
+                ) }}
+                {% for error in form.source_url.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form.file_path.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                {{ form.file_path(
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                    placeholder="Optional stored file path"
+                ) }}
+                <p class="mt-1 text-xs text-slate-500">
+                    Enter a file path only if the document is already stored and accessible to the application.
+                </p>
+                {% for error in form.file_path.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="border-t border-slate-100 pt-5">
+                <h3 class="text-sm font-semibold text-slate-900">
+                    Entity Association
+                </h3>
+                <p class="mt-1 text-sm text-slate-500">
+                    Optionally associate this evidence with a registered company.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                    {{ form.entity_type.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.entity_type(
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    ) }}
+                    {% for error in form.entity_type.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div>
+                    {{ form.entity_id.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                    {{ form.entity_id(
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100",
+                        placeholder="Enter registered company ID"
+                    ) }}
+                    {% for error in form.entity_id.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-5">
+                <h3 class="text-sm font-semibold text-slate-900">
+                    Reliability Assessment
+                </h3>
+                <p class="mt-1 text-sm text-slate-500">
+                    Rate the reliability of this source from 1 (very low) to 5 (very high).
+                </p>
+            </div>
+
+            <div>
+                {{ form.reliability_score.label(class="mb-1 block text-sm font-medium text-slate-700") }}
+                {{ form.reliability_score(
+                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                ) }}
+                {% for error in form.reliability_score.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="flex flex-wrap gap-3 border-t border-slate-100 pt-5">
+                <button type="submit"
+                        class="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
+                    {{ submit_label }}
+                </button>
+
+                <a href="{{ url_for('evidence.index') }}"
+                   class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+    </section>
+
+</div>
+
+{% endblock %}

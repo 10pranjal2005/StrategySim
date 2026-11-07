@@ -1,0 +1,200 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <div>
+        <a href="{{ url_for('scenario_simulator.index') }}"
+           class="text-sm text-blue-700 hover:underline">← Back to Scenario Simulator</a>
+
+        <div class="mt-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900">{{ scenario.scenario_name }}</h1>
+                <p class="mt-1 text-sm text-gray-500">
+                    {{ scenario.company_name }} ·
+                    {{ scenario.scenario_type.replace("_", " ").title() }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                {% if scenario.status != "Archived" and current_user.role in ["Administrator", "Analyst"] %}
+                <form method="POST"
+                      action="{{ url_for('scenario_simulator.simulate', scenario_id=scenario.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                            class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-800">
+                        Run Simulation
+                    </button>
+                </form>
+
+                <form method="POST"
+                      action="{{ url_for('scenario_simulator.archive', scenario_id=scenario.id) }}"
+                      onsubmit="return confirm('Archive this scenario?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                            class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Archive
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+            <p class="text-sm text-gray-500">Company</p>
+            <p class="mt-2 text-lg font-semibold text-gray-900">{{ scenario.company_name }}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+            <p class="text-sm text-gray-500">Scenario Status</p>
+            <p class="mt-2 text-lg font-semibold text-gray-900">{{ scenario.status }}</p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-5">
+            <p class="text-sm text-gray-500">Created</p>
+            <p class="mt-2 text-lg font-semibold text-gray-900">{{ scenario.created_at }}</p>
+        </div>
+    </div>
+
+    {% if scenario.description %}
+    <div class="rounded-xl border border-gray-200 bg-white p-5">
+        <h2 class="font-semibold text-gray-900">Description</h2>
+        <p class="mt-2 text-sm leading-6 text-gray-600">{{ scenario.description }}</p>
+    </div>
+    {% endif %}
+
+    <div class="rounded-xl border border-gray-200 bg-white p-5">
+        <h2 class="text-lg font-semibold text-gray-900">Scenario Assumptions</h2>
+        {% if scenario.parameters %}
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {% for key, value in scenario.parameters.items() %}
+            <div class="rounded-lg bg-gray-50 p-3">
+                <p class="text-xs text-gray-500">{{ key.replace("_", " ").title() }}</p>
+                <p class="mt-1 text-sm font-medium text-gray-900">{{ value }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="mt-3 text-sm text-gray-500">No assumptions recorded.</p>
+        {% endif %}
+    </div>
+
+    <div class="rounded-xl border border-gray-200 bg-white p-5">
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Simulation Results</h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Baseline values are compared with the simulated values.
+            </p>
+        </div>
+
+        {% if results %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Metric</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">Baseline</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">Simulated</th>
+                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase text-gray-500">Change</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">Interpretation</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for result in results %}
+                    <tr>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                            {{ result.result_name }}
+                        </td>
+                        <td class="px-4 py-3 text-right text-sm text-gray-600">
+                            {{ result.baseline_value if result.baseline_value is not none else "Unavailable" }}
+                        </td>
+                        <td class="px-4 py-3 text-right text-sm text-gray-600">
+                            {{ result.simulated_value if result.simulated_value is not none else "Unavailable" }}
+                        </td>
+                        <td class="px-4 py-3 text-right text-sm text-gray-600">
+                            {{ result.change_value if result.change_value is not none else "Unavailable" }}
+                            {% if result.change_percent is not none %}
+                                <span class="text-xs text-gray-500">({{ "%.2f"|format(result.change_percent) }}%)</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600">
+                            {{ result.interpretation or "No interpretation available." }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="mb-3 text-sm font-semibold text-gray-900">Baseline vs Simulated</h3>
+            <div id="scenarioComparisonChart" class="min-h-72"></div>
+        </div>
+
+        {% else %}
+        <div class="rounded-lg bg-gray-50 p-6 text-center">
+            <p class="font-medium text-gray-800">No simulation results yet</p>
+            <p class="mt-1 text-sm text-gray-500">
+                Run the simulation to calculate the scenario impact.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% if results %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+    const scenarioLabels = {{ results | map(attribute="result_name") | list | tojson }};
+    const baselineValues = {{ results | map(attribute="baseline_value") | list | tojson }};
+    const simulatedValues = {{ results | map(attribute="simulated_value") | list | tojson }};
+
+    const numericLabels = [];
+    const numericBaseline = [];
+    const numericSimulated = [];
+
+    scenarioLabels.forEach((label, index) => {
+        if (typeof baselineValues[index] === "number" &&
+            typeof simulatedValues[index] === "number") {
+            numericLabels.push(label);
+            numericBaseline.push(baselineValues[index]);
+            numericSimulated.push(simulatedValues[index]);
+        }
+    });
+
+    if (numericLabels.length > 0) {
+        Plotly.newPlot("scenarioComparisonChart", [
+            {
+                x: numericLabels,
+                y: numericBaseline,
+                name: "Baseline",
+                type: "bar"
+            },
+            {
+                x: numericLabels,
+                y: numericSimulated,
+                name: "Simulated",
+                type: "bar"
+            }
+        ], {
+            barmode: "group",
+            margin: { t: 20, r: 20, b: 70, l: 65 },
+            paper_bgcolor: "white",
+            plot_bgcolor: "white",
+            yaxis: { title: "Value", gridcolor: "#e5e7eb" },
+            xaxis: { automargin: true }
+        }, {
+            responsive: true,
+            displayModeBar: false
+        });
+    } else {
+        document.getElementById("scenarioComparisonChart").innerHTML =
+            '<p class="text-sm text-gray-500">No numeric values are available for chart comparison.</p>';
+    }
+</script>
+{% endif %}
+{% endblock %}
